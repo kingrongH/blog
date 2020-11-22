@@ -1,0 +1,58 @@
+# The URL the site will be built for
+base_url = "https://blog.kingrong.kr"
+title = "kingrong's blog"
+# Whether to automatically compile all Sass files in the sass directory
+compile_sass = true
+
+# Whether to do syntax highlighting
+# Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
+highlight_code = true
+# highlight_theme = "base16-ocean-dark"
+
+# Whether to build a search index to be used later on by a JavaScript library
+build_search_index = true
+
+theme = "anpu"
+
+taxonomies = [
+    # You can enable/disable RSS
+    {name = "categories", rss = true},
+    {name = "tags", rss = true},
+]
+
+[search]
+# Whether to include the title of the page/section in the index
+include_title = true
+# Whether to include the description of the page/section in the index
+include_description = false
+# Whether to include the rendered content of the page/section in the index
+include_content = true
+# At which character to truncate the content to. Useful if you have a lot of pages and the index would
+# become too big to load on the site. Defaults to not being set.
+# truncate_content_length = 100
+
+[extra]
+# Put all your custom variables here
+navbar_items = [
+	{ url = "$BASE_URL/", name = "Home" },
+	{ url = "$BASE_URL/posts", name = "Posts" },
+	{ url = "$BASE_URL/tags", name = "Tags" },
+	{ url = "$BASE_URL/categories", name = "Categories" },
+]
+katex_enable = true
+katex_auto_render = true
+
+[extra.favicon]
+favicon_16x16 = "/images/favicon-16x16-next.png"
+favicon_32x32 = "/images/favicon-32x32-next.png"
+apple_touch_icon = "/images/apple-touch-icon-next.png"
+safari_pinned_tab = "/images/logo.svg"
+
+[extra.author]
+name = "kingrong"
+avatar = "https://i.loli.net/2018/08/13/5b71647961dc7.jpg"
+
+[extra.social]
+github = "kingrongH"
+twitter = "King_rong_"
+
