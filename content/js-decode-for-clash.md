@@ -9,7 +9,7 @@ categories = ["JavaScript"]
 
 今天我决定将我使用JavaScript开发了一个vmess解析工具的记录po给大家看。这个工具主要是为[clash](https://github.com/Dreamacro/clash) linux版本设计的，包含获取vmess订阅链接内容，和解析单个链接等功能。
 
-<!--more-->
+<!-- more -->
 
 ## 关于
 

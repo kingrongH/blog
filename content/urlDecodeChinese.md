@@ -18,7 +18,7 @@ categories = ["JavaScript"]
 	%E4%B8%AD%E6%96%87%E6%90%9C%E7%B4%A2
 
 所以如何它是如何编码和解码中文的呢？
-<!--more-->
+<!-- more -->
 
 ## 原理
 

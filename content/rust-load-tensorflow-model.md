@@ -11,7 +11,7 @@ categories = ["Rust"]
 
 本文将介绍如何使用Rust加载Tensorflow 的模型
 
-<!--more-->
+<!-- more -->
 
 多数时候我们并不直接使用Rust + Tensorflow进行训练，如果要这么做的话，岂不是白白浪费了前人给我们筑的基石，所以我们的目的限于使用Rust + Tensorflow 加载模型然后进行预测。之所以这么做是因为python用作预测的话可能并不能直接用于生产使用，因为速度太慢了，所以使用Rust + Tensorflow 加载训练好的模型就会是一个很好的选择。
 

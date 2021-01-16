@@ -13,7 +13,7 @@ categories = ["Rust"]
 
 这篇文章就是对rust ffi 一次小小尝试的记录。
 
-<!--more-->
+<!-- more -->
 
 ## 编写一个c，并编译为库
 

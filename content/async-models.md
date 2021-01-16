@@ -15,7 +15,7 @@ categories = ["Rust"]
 
 <iframe width="889" height="500" src="https://www.youtube.com/embed/skos4B5x7qE?list=PL85XCvVPmGQjuWUNeFCgl8X2EOC_aAq5N" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-<!--more-->
+<!-- more -->
 
 ## 零成本抽象
 

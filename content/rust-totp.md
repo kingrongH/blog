@@ -13,7 +13,7 @@ categories = ["Rust"]
 
 这一次实现的代码可以在我的Github中找到。Github: [totp](https://github.com/kingrongH/totp)
 
-<!--more-->
+<!-- more -->
 
 ## Base32实现
 

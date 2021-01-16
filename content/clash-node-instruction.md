@@ -10,7 +10,7 @@ categories = ["JavaScript"]
 我觉得使用linux的你应该尝试一下使用这个工具科学上网，自从ssr发展了科学上网节点的订阅形式之后，各大的机场都支持了订阅，由于日渐增高的墙，许许多多的科学上网的工具也都层出不穷，但不是所有工具都支持订阅链接导入的方式获取节点，许多的工具还都只能够手动更改配置运行，尤其是对linux的用户来说。[clash](https://github.com/Dreamacro/clash)是其中一款，非常棒的工具，我正在使用它，但没有linux下的支持订阅的实现。
 所以我写了一个工具[clash-node](https://github.com/kingrongH/clash-node)，支持订阅链接。
 
-<!--more-->
+<!-- more -->
 
 ## 介绍
 
