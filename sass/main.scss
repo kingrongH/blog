@@ -134,7 +134,21 @@ pre {
     overflow: auto;
 }
 
-code,
+pre code {
+    background: none;
+}
+
+code {
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0.0em 0.3em;
+  border-radius: 3px;
+  color: #6e6b5e;
+  background: #f1f1f1;
+  font-size: 0.875em;
+  font-family: "Source Code Pro", Consolas, "Ubuntu Mono", Menlo, "DejaVu Sans Mono", monospace, monospace;
+}
+
 pre,
 kbd {
     font-family: monospace;
@@ -337,7 +351,8 @@ article img {
 }
 
 .pagination-item {
-    background: #fafafa;
+    border-radius: 6px;
+    background: #ffefe0;
     padding: 0.75em 0.75em;
 }
 
