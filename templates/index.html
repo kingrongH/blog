@@ -49,6 +49,9 @@
                 {% endif %}
             {% endblock content %}
         </main>
+
+        <div>{% block after_content %}{% endblock after_content %}</div>
+
         <footer>
             <p>
                 © {{ config.title }} {{ now() | date(format="%Y") }}
