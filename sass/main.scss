@@ -432,3 +432,122 @@ ul.language-select > li {
         margin-left: 5%;
     }
 }
+
+#toc-aside {
+  display: none;
+}
+
+#toc-inline summary {
+  margin-bottom: .2rem;
+}
+
+@media (min-width: 80rem) {
+  #toc-inline {
+    display: none;
+  }
+
+  #toc-aside {
+    display: block;
+    width: 12rem;
+    position: sticky;
+    float: left;
+    top: 3.5rem;
+    margin-top: 1rem;
+    margin-left: -15rem;
+    font-size: 90%;
+    line-height: 1.2;
+  }
+
+  #toc-aside li > a, #toc-aside h2 {
+    opacity: .5;
+    transition: opacity .5s;
+  }
+
+  #toc-aside:hover li > a, #toc-aside:hover h2 {
+    opacity: 1;
+  }
+
+  #toc-aside li.active > a {
+    font-weight: bold;
+  }
+
+  #toc-aside h2 {
+    font-size: 110%;
+    margin-bottom: .2rem;
+  }
+
+  #toc-aside ul {
+    margin: 0 0 .2rem 0;
+    padding: 0 0 0 1rem;
+    list-style:none;
+  }
+
+  #toc-aside ul li a:before {
+    content: "";
+    border-color: transparent #008eef;
+    border-style: solid;
+    border-width: 0.35em 0 0.35em 0.45em;
+    display: block;
+    height: 0;
+    width: 0;
+    left: -1em;
+    top: 0.9em;
+    position: relative;
+  }
+
+  #toc-aside.coarse li ul {
+    display: none;
+  }
+
+  aside.page-aside-right {
+    position: absolute;
+    min-width: 11rem;
+    max-width: 17rem;
+    top: 4rem;
+    margin-left: 45rem;
+    margin-right: 2rem;
+    font-size: 90%;
+  }
+
+  aside.page-aside-right .block {
+    margin-bottom: 1.5rem;
+  }
+
+  aside.page-aside-right h2 {
+    font-size: 110%;
+    margin-bottom: .2rem;
+  }
+
+  aside.page-aside-right ul {
+    margin: 0 0 .2rem 0;
+    padding: 0 0 0 1rem;
+  }
+
+  aside.page-aside-right ul li {
+    margin-top: .5rem;
+  }
+
+  #language-selector li {
+    margin-top: 0;
+  }
+
+  aside#all-posts-link {
+    position: fixed;
+    top: 1.25rem;
+    margin-top: 0;
+    margin-left: -15rem;
+  }
+}
+
+aside.page-aside-right time {
+  color: #9a9a9a;
+}
+
+.right-to-left {
+	direction: rtl;
+	font-family: Vazir;
+}
+
+.left-to-right, .right-to-left pre, .right-to-left table, .right-to-left[id="toc-aside"] {
+	direction: ltr;
+}

@@ -26,3 +26,29 @@
         {{ page_macros::utterances() }}
     </section>
 {% endblock after_content %}
+
+{% block toc_aside %}
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+            {% for h1 in page.toc %} <li>
+                <a href="{{h1.permalink | safe}}">{{ h1.title }}</a>
+                {% if h1.children %} <ul>
+                    {% for h2 in h1.children %}
+                        <li>
+                            <a href="{{h2.permalink | safe}}">{{ h2.title }}</a>
+                        </li>
+                        {% if h2.children %} <ul>
+                            {% for h3 in h2.children %}<li>
+                                <a href="#{{h3.id | safe}}">{{ h3.title | safe }}</a>
+                            </li>{% endfor %}
+                        </ul> {% endif %}
+                    {% endfor %}
+                </ul> {% endif %}
+            </li> {% endfor %}
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+{% endblock toc_aside %}
+
+
