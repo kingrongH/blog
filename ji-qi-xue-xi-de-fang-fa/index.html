@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>机器学习的方法介绍</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/ji-qi-xue-xi-de-fang-fa/#ji-qi-xue-xi-fang-fa">机器学习方法</a>
+                 <ul>
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/ji-qi-xue-xi-de-fang-fa/#jian-du-xue-xi-supervised-learning">监督学习(supervised learning)</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/ji-qi-xue-xi-de-fang-fa/#fei-jian-du-xue-xi-unsupervised-learning">非监督学习(unsupervised learning)</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/ji-qi-xue-xi-de-fang-fa/#ban-jian-du-xue-xi-semi-supervised-learning">半监督学习(semi-supervised learning)</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/ji-qi-xue-xi-de-fang-fa/#qiang-hua-xue-xi-reinforcement-learning">强化学习(reinforcement learning)</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/ji-qi-xue-xi-de-fang-fa/#yi-chuan-suan-fa-genetic-algorithm">遗传算法(genetic algorithm)</a>
+                        </li>
+                        
+                    
+                </ul> 
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>机器学习的方法介绍</h1>
+    </header>
+    <div class="content">
+        <h1 id="ji-qi-xue-xi-fang-fa">机器学习方法</h1>
+<p>机器学习具体有哪些方法呢？主要包括以下几种：</p>
+<ul>
+<li>监督学习(supervised learning)</li>
+<li>非监督学习(unsupervised learning) </li>
+<li>半监督学习(semi-supervised learning)</li>
+<li>强化学习(reinforcement learning)</li>
+<li>遗传算法(genetic algorithm)</li>
+</ul>
+<h2 id="jian-du-xue-xi-supervised-learning">监督学习(supervised learning)</h2>
+<p>监督学习是通过学习已有的资料建立模型，然后再依据此模型来推测新的实例，在这种学习过程中我们需要对已有的学习资料提供标签信息。</p>
+<p>比如说通过学习大量猫的图（这个时候我们需要告诉机器这是猫），然后建立猫的模型，再依据所建立的模型判断所给的图片是否是猫。</p>
+<p><strong>特点</strong>：有数据、有标签</p>
+<h2 id="fei-jian-du-xue-xi-unsupervised-learning">非监督学习(unsupervised learning)</h2>
+<p>非监督学习与监督学习相对，通过让机器自己学习大量训练资料并且自主判断资料之间的区别，不提供数据对应的标签信息。</p>
+<p>比如通过让机器学习大量的猫和狗的图片，并且不告诉机器那些是猫那些是狗，机器根据所学习到的规律来判断我们所给的图片是猫或者狗。</p>
+<p><strong>特点</strong>：有数据、无标签</p>
+<h2 id="ban-jian-du-xue-xi-semi-supervised-learning">半监督学习(semi-supervised learning)</h2>
+<p>半监督学习顾名思义综合了监督学习与非监督学习，在学习过程中利用少量有标签的样本和大量没有标签的样本来进行训练和分类。</p>
+<p><strong>特点</strong>：有数据、有些有标签、有些无标签</p>
+<h2 id="qiang-hua-xue-xi-reinforcement-learning">强化学习(reinforcement learning)</h2>
+<p>把计算机丢到一个它完全陌生的环境或者让它完成一项从未接触过的任务，它自己会去尝试各种手段让自己适应这个环境，或者学会完成这个任务的方法途径。</p>
+<p>比如说训练机器人投篮，给它一个球告诉它它的目标是投中，让它自己尝试各种各样的投篮方法。在开始阶段它的命中率可能会非常的低，不过它会像人类一样总结自己成功或失败的经验，最终达到较高的成功率。Alpha Go也正式利用了这样一种学习方式。</p>
+<p><strong>特点</strong>：总结经验</p>
+<h2 id="yi-chuan-suan-fa-genetic-algorithm">遗传算法(genetic algorithm)</h2>
+<p>这种方法是模拟我们所熟知的进化理论，适者生存，通过这种淘汰机制去选择最优的设计或模型。</p>
+<p><strong>特点</strong>：进化、淘汰</p>
+<p><code>参考</code>：<a href="https://morvanzhou.github.io/tutorials/machine-learning/ML-intro/1-1-machine-learning/" title="多种多样的机器学习"><code>多种多样的机器学习</code></a></p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date">19 August 2018</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/learn/">Learn</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/ji-qi-xue-xi/">#机器学习</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

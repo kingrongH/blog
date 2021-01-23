@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>若干数最小公倍数求法[JavaScript实现]</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/smallestcommons/#guan-yu">关于</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/smallestcommons/#zui-da-gong-yue-shu-suan-fa">最大公约数算法</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/smallestcommons/#ruo-gan-shu-zui-xiao-gong-bei-shu-si-lu">若干数最小公倍数思路</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/smallestcommons/#ju-ti-javascriptshi-xian">具体JavaScript实现</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>若干数最小公倍数求法[JavaScript实现]</h1>
+    </header>
+    <div class="content">
+        <h2 id="guan-yu">关于</h2>
+<p>假设有这么一道题目：</p>
+<blockquote>
+<p>求给定任意个整数的最小公倍数。</p>
+</blockquote>
+<p><strong>你会怎么做？</strong></p>
+<p>我们设想给定一个参数为数组，数组中包含我们要求最小公倍数的最小整数，返回一个值为这若干数的最小公倍数的整数。</p>
+<p><strong>我建议你先自己想一想</strong></p>
+<p>是的，我在学习的过程中遇到了这样一个题目，并且苦思冥想了好些时间，终于让我给找到一个方法。接下来我将来阐述我解答这道题的思路。总共包含一下几个部分：</p>
+<ul>
+<li>最大公约数算法</li>
+<li>若干数最小公倍数思路</li>
+<li>具体JavaScript实现</li>
+</ul>
+<h2 id="zui-da-gong-yue-shu-suan-fa">最大公约数算法</h2>
+<p>学计算机的同学都知道有这样一个算法，名字叫做欧几里得算法，来自古希腊的数学家欧几里得，又叫做辗转相除法。对于学习过的同学，我想你已经可以不必要看这一小节了。关于欧几里得算法它是这样描述的：</p>
+<blockquote>
+<p>两个整数的最大公约数等于其中较小的那个数和两数相除余数的最大公约数。最大公约数（Greatest Common Divisor）缩写为GCD。</p>
+</blockquote>
+<p>这样简洁的描述，让我们来JavaScript实现它吧。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-Javascript" data-lang="Javascript"><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">gcd(p,q){
+	</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(q===</span><span style="color:#b5cea8;">0</span><span style="color:#dcdcdc;">){
+		</span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">p;
+	}
+	</span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">gcd(q,p%q);
+}
+</span></code></pre>
+<p>为什么会用到最大公约数的算法呢，接下来的思路里解释。</p>
+<h2 id="ruo-gan-shu-zui-xiao-gong-bei-shu-si-lu">若干数最小公倍数思路</h2>
+<p>我们求几个数的最小公倍数，最简单的方法当然是把这几个数直接相乘。但是我们要求的是最小公倍数，相乘得到的不一定是最小公倍数，数与数之间可能还有约数，相乘的结果与最小公倍数的差别可能就是多乘了一个两个约数。如果我们所有的约数都除掉的话是不是就是最小的公倍数了呢。</p>
+<p>答案是肯定的，这就是为什么我们需要用到 <em>欧几里得算法</em>。</p>
+<p>所以很容易地我有了第一个想法，就是先把所有结果都相乘然后再除以所有数的最大公约数。这个想法被验证是错误的，我们我得到的是相乘的结果不是相加的结果，不应该除以所有数的最大公因数，相乘所有数与数之间的公约数都会乘进去。</p>
+<p>第二个想法就是，我对这个数组遍历，然后对每一个数除以它前面所有数的最大公约数，得到一个新的数组，我把新数组中的所有数都乘起来，就是这几个数的最小公倍数了。这个方法是先把公约数去除掉，然后在相乘。相较于之前的方法在算法的复杂度上可能有所降低。</p>
+<p>是的这个方法没有证明，我也无从知晓别处是否有这样的方法，我判断它是否有效的办法就是先用代码来实现它。对我来说这确实是一个没有被证明的算法，希望各位看观能够提提意见，如有错误还请指正。</p>
+<h2 id="ju-ti-javascriptshi-xian">具体JavaScript实现</h2>
+<p>接下来还请看我的代码实现。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">smallestCommons(arr){
+	</span><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">gcd(p,q){
+		</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(q===</span><span style="color:#b5cea8;">0</span><span style="color:#dcdcdc;">){
+			</span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">p;
+		}
+		</span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">gcd(q,p%q);
+	}
+	</span><span style="color:#569cd6;">for</span><span style="color:#dcdcdc;">(</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">i=</span><span style="color:#b5cea8;">0</span><span style="color:#dcdcdc;">;i</span><span style="color:#569cd6;">&lt;</span><span style="color:#dcdcdc;">arr.length;i++){
+        </span><span style="color:#569cd6;">for</span><span style="color:#dcdcdc;">(</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">j=</span><span style="color:#b5cea8;">0</span><span style="color:#dcdcdc;">;j</span><span style="color:#569cd6;">&lt;</span><span style="color:#dcdcdc;">i;j++){
+            arr[j] = arr[i]/gcd(arr[i],arr[j]);
+        }
+    }
+	</span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">arr.reduce((x,y)</span><span style="color:#569cd6;">=&gt;</span><span style="color:#dcdcdc;">{
+		</span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">x*y;
+	});
+
+}
+</span></code></pre>
+<p>以上就是我实现的代码，如果有错误，欢迎在评论区指正，谢谢！</p>
+<hr />
+<p>参考链接：</p>
+<p><a href="https://www.w3cschool.cn/codecamp/smallest-common-multiple.html">最小公倍数算法挑战</a></p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date"> 4 March 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/javascript/">JavaScript</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/javascript/">#javascript</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/algorithm/">#algorithm</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

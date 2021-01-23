@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>deoplete补全问题:restarting server because it&#x27;s taking too long</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/deopletebu-quan-wen-ti/#wen-ti-miao-shu">问题描述</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/deopletebu-quan-wen-ti/#jie-jue-fang-fa">解决方法</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>deoplete补全问题:restarting server because it&#x27;s taking too long</h1>
+    </header>
+    <div class="content">
+        <h2 id="wen-ti-miao-shu">问题描述</h2>
+<p>用vim写python的时候遇到一个问题：restarting server because it's taking too long,如图所示：</p>
+<p><img src="https://i.loli.net/2018/08/21/5b7be3a0c975d.png" alt="too long" title="Restarting" /></p>
+<p>并且补全没有加载出来。</p>
+<p>这个问题一般只出现在我们需要调用比较大的pyhton包的时候，比如tensorflow、numpy和pandas等。</p>
+<h2 id="jie-jue-fang-fa">解决方法</h2>
+<p>deoplete的github上有相似的issue：<a href="https://github.com/zchee/deoplete-jedi/issues/167">#167</a>
+因为deoplete在补全之前会将我们import的包缓存起来</p>
+<p><code>~/.cache/deoplete/jedi/3.6/</code></p>
+<p>deoplete默认的加载时间是10s,对于有些大包的加载来说是不够的，所以我们要做的便是增加加载的时间。</p>
+<p><strong>解决:</strong></p>
+<p>在这里我使用的是SpaceVim ，我只需要在我的 <code>myspacevim.vim</code>的配置下增加以下代码：</p>
+<pre style="background-color:#1e1e1e;">
+<code>let g:deoplete#sources#jedi#server_timeout = 25
+</code></pre>
+<p>你也可以在你自己的<code>vimrc</code>中增加，其中默认的加载时间是<code>10s</code>，我将之调整到了<code>25s</code>，因为经过我的不断测试对于我加载tensorflow来说，这个时间是刚刚好了。</p>
+<p>如果你想要多次测试缓存的时间，你可以在每次测试之后将 <code>~/.cache/deoplete/jedi/3.6</code>  里的缓存文件删除。</p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date">21 August 2018</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/problems/">Problems</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/vim/">#vim</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/spacevim/">#SpaceVim</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/deoplete/">#deoplete</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

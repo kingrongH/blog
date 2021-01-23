@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>ssr和ss链接解码(decode)</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/ssr-decode/#guan-yu">关于</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/ssr-decode/#yuan-li">原理</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/ssr-decode/#ce-shi">测试</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/ssr-decode/#xiang-fa">想法</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>ssr和ss链接解码(decode)</h1>
+    </header>
+    <div class="content">
+        <h1 id="guan-yu">关于</h1>
+<p>我们所熟知的翻墙工具<code>Shadowsocksr</code>和<code>Shadowocks</code>都有可以直接通过链接导入节点配置的功能。那么它们到底是怎么从ssr或者ss链接的一堆乱码中提取出节点信息的呢？</p>
+<h1 id="yuan-li">原理</h1>
+<p>实际上无论是<code>ssr</code>或者<code>ss</code>链接都是，经过多次<code>[Base64](https://zh.wikipedia.org/wiki/Base64 ’Base64‘)</code>编码方式进行加密的，这种加密方式无法起到真正的加密的效果，正所谓<code>防君子不防小人</code>。</p>
+<p>由于Base64解码后含有<code>+</code>、<code>/</code>等url敏感字符所以在针对url的Base64编码中，会将<code>/</code>改为<code>_</code>，将<code>+</code>改为<code>-</code>。Base64所解码的字符个数必须是4的倍数，不足四的倍数的需要在字符末尾添加<code>#</code>补全为4的倍数。</p>
+<p><code>ssr</code> 的编码方式就是采用针对url的Base64编码(UrlBase64Encode)的，在解码过程中我发现，ssr加密前的格式是</p>
+<pre style="background-color:#1e1e1e;">
+<code>server:server_port:protocol:method:obfs:password/?obfsparam=obfs_param&amp;protoparam=protocol_param&amp;remarks=remarks&amp;group=group
+</code></pre>
+<p>其中<code>password</code>及之后的<code>obfs_param</code>等参数都需要进一步的解码的，并且<code>obfs_param</code>及之后的参数在不同的节点中可能是非必须的。</p>
+<h1 id="ce-shi">测试</h1>
+<p>本次测试采用<a href="https://doub.io/sszhfx/">逗比根据地</a>分享的免费帐号。测试工具采用<a href="http://tool.oschina.net/encrypt?type=3">开源中国在线工具</a>。链接如下：</p>
+<pre style="background-color:#1e1e1e;">
+<code>ssr://NDUuNjIuMjM4LjE0Nzo1NjA1OmF1dGhfc2hhMV92NDpjaGFjaGEyMDp0bHMxLjJfdGlja2V0X2F1dGg6Wkc5MVlpNXBieTl6YzNwb1puZ3ZLalUyTURVLz9yZW1hcmtzPTVweXM1WVdONkxTNTZMU201WS0zNXAybDZJZXFPbVJ2ZFdJdWFXOHZjM042YUdaNEx3
+</code></pre>
+<p>去除<code>ssr://</code>前缀之后，解码结果如下</p>
+<pre style="background-color:#1e1e1e;">
+<code>45.62.238.147:5605:auth_sha1_v4:chacha20:tls1.2_ticket_auth:ZG91Yi5pby9zc3poZngvKjU2MDU/?remarks=5pys5YWN6LS56LSm5Y-35p2l6IeqOmRvdWIuaW8vc3N6aGZ4Lw
+</code></pre>
+<p><img src="https://i.loli.net/2018/10/07/5bb96788bf5a7.png" alt="ssr_decode1.png" title="ssr decode" /></p>
+<p>这里不包含混淆参数和协议参数等，我们只需要对<code>password</code>和<code>remarks</code>进行单独解码：</p>
+<p><img src="https://i.loli.net/2018/10/07/5bb96884374a5.png" alt="password" title="password" /></p>
+<p><img src="https://i.loli.net/2018/10/07/5bb968f07d86d.png" alt="remarks" title="remarks" /></p>
+<p>其中我们可以注意到<code>remarks</code>这一项中包含一个<code>-</code>，我们需要将它改成<code>+</code>才能解码成功。</p>
+<h1 id="xiang-fa">想法</h1>
+<p>在linux环境下使用python 版本ssr翻越长城的方式是十分不方便的，我们还是得必须自己将节点配置添加到json文件中，有没有可能像windows、ios等其他客户端一样通过ssr链接导入节点配置呢。</p>
+<p>在下一节中我们将使用python来实现这个代码。 </p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date"> 7 October 2018</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/shadowsocksr/">Shadowsocksr</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/shadowsocksr/">#shadowsocksr</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/shadowsocks/">#shadowsocks</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

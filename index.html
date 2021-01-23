@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>kingrong&#x27;s blog</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a class="active" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div>  </div>
+
+        <main id="main" tabindex="-1">
+            
+                
+                
+                    
+    <article class="post-list">
+        <header> 
+            <h1>
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;rust-load-tensorflow-model&#x2F;">Rust 加载tensorflow模型用于预测</a>
+            </h1>
+        </header>
+
+        
+        <div class="content post-summary">
+            <p>最近的时间做了一个项目：基于Rust的车牌图像处理，因为爱好Rust，而项目又不得不做，于是乎用Rust重新造了一个轮子，但是也不是没有什么用处，起码这个轮子变得很快并且推广了Rust在机器学习方面的应用，私心里还颇有些得意的。但是这类项目用到了深度学习，而Rust并没有纯深度学习框架的实现，所以使用tensorflow binding是较为理想的方案。</p>
+<p>本文将介绍如何使用Rust加载Tensorflow 的模型</p>
+
+        </div>
+        
+        
+        
+    <div class="article-info">
+        
+        <div class="article-date"> 1 May 2020</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/rust/">Rust</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/rust/">#rust</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/tensorflow/">#tensorflow</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+    </article>
+
+                
+                    
+    <article class="post-list">
+        <header> 
+            <h1>
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;rust-totp&#x2F;">rust实现TOTP算法（Base32加密）</a>
+            </h1>
+        </header>
+
+        
+        <div class="content post-summary">
+            <p>公司用来进行二次验证登陆的方式是TOTP，全称是_Time-based One-Time Password algorithm_。维基百科上对与TOTP的说明的十分详细：<a href="https://zh.wikipedia.org/wiki/%E5%9F%BA%E4%BA%8E%E6%97%B6%E9%97%B4%E7%9A%84%E4%B8%80%E6%AC%A1%E6%80%A7%E5%AF%86%E7%A0%81%E7%AE%97%E6%B3%95">基于时间的一次性密码算法</a> 从这里我们可以找到我们需要实现一个totp可能需要用到的要素：epoch，time step，密钥，加密哈希算法等。还有实现_totp_的基本原理。事实上对比一些别的实现，我们也可以知道中文维基上的有错误之处。</p>
+<p>这一次我将记录我实现totp算法的过程以及遇到的坑。</p>
+<p>这一次实现的代码可以在我的Github中找到。Github: <a href="https://github.com/kingrongH/totp">totp</a></p>
+
+        </div>
+        
+        
+        
+    <div class="article-info">
+        
+        <div class="article-date">25 September 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/rust/">Rust</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/rust/">#rust</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/totp/">#totp</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/base32/">#base32</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+    </article>
+
+                
+                    
+    <article class="post-list">
+        <header> 
+            <h1>
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;rust-error-handle&#x2F;">Rust 错误处理探索</a>
+            </h1>
+        </header>
+
+        
+        <div class="content post-summary">
+            <p>从JavaScript，从Java，从Python甚至是从C过来，都会不习惯_Rust_的错误处理方式。但这不是rust限制了你错误处理的方式。事实上rust提供了很大的自由度来进行错误处理，灵活的方式。</p>
+<p>对于Rust来说，<code>Option</code>和<code>Result</code>很大程度上造成了你在错误处理上的不适感。</p>
+<p>要熟练地使用这些方式并不简单，但当你熟练之后，你应当会十分地enjoy这个过程。</p>
+<p>这篇博客简单记录了一下我最近遇到的错误处理的方式。</p>
+
+        </div>
+        
+        
+        
+    <div class="article-info">
+        
+        <div class="article-date">12 September 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/rust/">Rust</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/rust/">#rust</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/error/">#error</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+    </article>
+
+                
+                    
+    <article class="post-list">
+        <header> 
+            <h1>
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;async-models&#x2F;">编程语言中的异步IO模型</a>
+            </h1>
+        </header>
+
+        
+        <div class="content post-summary">
+            <p>在看先前的拉丁美洲的Rustconf，偶然看到了<em>Without Boats</em>大佬的关于零成本异步IO的介绍。</p>
+<p>在其中学习到一些异步编程模型，在此做一个总结。 </p>
+<p>视频链接：<a href="https://youtu.be/skos4B5x7qE?list=PL85XCvVPmGQjuWUNeFCgl8X2EOC_aAq5N">Without Boats: Zero-Cost Async IO</a></p>
+<iframe width="889" height="500" src="https://www.youtube.com/embed/skos4B5x7qE?list=PL85XCvVPmGQjuWUNeFCgl8X2EOC_aAq5N" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+        </div>
+        
+        
+        
+    <div class="article-info">
+        
+        <div class="article-date"> 9 September 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/rust/">Rust</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/rust/">#rust</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/aync/">#aync</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+    </article>
+
+                
+                    
+    <article class="post-list">
+        <header> 
+            <h1>
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;rust-ffi-test&#x2F;">尝试rust ffi，rust调用clang</a>
+            </h1>
+        </header>
+
+        
+        <div class="content post-summary">
+            <p>最近试图想用rust做一个小工具，但是rust上目前还没有对应的库，而C语言中有对应的库。想尝试使用这个库，我需要先了解一下rust ffi（Foreign Function Interface）。</p>
+<p>要想将rust的ffi应用到一整个库上，首先我们先从一个文件做起。</p>
+<p>这篇文章就是对rust ffi 一次小小尝试的记录。</p>
+
+        </div>
+        
+        
+        
+    <div class="article-info">
+        
+        <div class="article-date"> 2 September 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/rust/">Rust</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/rust/">#rust</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/ffi/">#ffi</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+    </article>
+
+                
+                    
+    <article class="post-list">
+        <header> 
+            <h1>
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;clash-node-instruction&#x2F;">你应该试试这个科学上网工具clash-node</a>
+            </h1>
+        </header>
+
+        
+        <div class="content post-summary">
+            <p>我觉得使用linux的你应该尝试一下使用这个工具科学上网，自从ssr发展了科学上网节点的订阅形式之后，各大的机场都支持了订阅，由于日渐增高的墙，许许多多的科学上网的工具也都层出不穷，但不是所有工具都支持订阅链接导入的方式获取节点，许多的工具还都只能够手动更改配置运行，尤其是对linux的用户来说。<a href="https://github.com/Dreamacro/clash">clash</a>是其中一款，非常棒的工具，我正在使用它，但没有linux下的支持订阅的实现。
+所以我写了一个工具<a href="https://github.com/kingrongH/clash-node">clash-node</a>，支持订阅链接。</p>
+
+        </div>
+        
+        
+        
+    <div class="article-info">
+        
+        <div class="article-date">13 May 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/javascript/">JavaScript</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/clash/">#clash</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/ssr/">#ssr</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/vmess/">#vmess</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/node/">#node</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+    </article>
+
+                
+                    
+    <article class="post-list">
+        <header> 
+            <h1>
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;urldecodechinese&#x2F;">网址中的中文编码和解码方法</a>
+            </h1>
+        </header>
+
+        
+        <div class="content post-summary">
+            <p>当我们在chrome的地址栏上输入中文的进行搜索之后，我们敲入的关键词在这个时候被编码成了我们看不懂的一串由<code>%</code>和十六进制数组成的东西。</p>
+<p>比如:</p>
+<p><code>中文搜索</code></p>
+<p>被编码成了</p>
+<p><code>%E4%B8%AD%E6%96%87%E6%90%9C%E7%B4%A2</code></p>
+<p>所以如何它是如何编码和解码中文的呢？</p>
+
+        </div>
+        
+        
+        
+    <div class="article-info">
+        
+        <div class="article-date">30 April 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/javascript/">JavaScript</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/url/">#url</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/node/">#node</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+    </article>
+
+                
+                    
+    <article class="post-list">
+        <header> 
+            <h1>
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;js-decode-for-clash&#x2F;">JavaScript 解析vmess链接，供clash-linux使用</a>
+            </h1>
+        </header>
+
+        
+        <div class="content post-summary">
+            <p>今天我决定将我使用JavaScript开发了一个vmess解析工具的记录po给大家看。这个工具主要是为<a href="https://github.com/Dreamacro/clash">clash</a> linux版本设计的，包含获取vmess订阅链接内容，和解析单个链接等功能。</p>
+
+        </div>
+        
+        
+        
+    <div class="article-info">
+        
+        <div class="article-date">12 April 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/javascript/">JavaScript</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/javascript/">#JavaScript</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/vmess/">#vmess</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/clash/">#Clash</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+    </article>
+
+                
+                    
+    <article class="post-list">
+        <header> 
+            <h1>
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;jslinkdedlist&#x2F;">JavaScript 链表的实现</a>
+            </h1>
+        </header>
+
+        
+        
+        
+    <div class="article-info">
+        
+        <div class="article-date"> 4 April 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/algorithm/">Algorithm</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/lian-biao/">#链表</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/javascript/">#JavaScript</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/algorithm/">#algorithm</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+    </article>
+
+                
+                    
+    <article class="post-list">
+        <header> 
+            <h1>
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;wps-darktheme-greyfont&#x2F;">wps在暗色主题下显示灰色字解决</a>
+            </h1>
+        </header>
+
+        
+        
+        
+    <div class="article-info">
+        
+        <div class="article-date"> 4 April 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/problems/">Problems</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/linux/">#linux</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/wps/">#wps</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+    </article>
+
+                
+                
+    <div class="pagination">
+        <div class="left pagination-item disabled">
+            
+        </div>
+        <div class="right pagination-item ">
+            
+            <a href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;page&#x2F;2&#x2F;">To older posts</a>
+            
+        </div>
+    </div>
+
+                
+            
+        </main>
+
+        <div></div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

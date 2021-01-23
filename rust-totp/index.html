@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>rust实现TOTP算法（Base32加密）</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/rust-totp/#base32shi-xian">Base32实现</a>
+                 <ul>
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/rust-totp/#base32-alphabethe-yuan-li">Base32 alphabet和原理</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/rust-totp/#dai-ma">代码</a>
+                        </li>
+                        
+                    
+                </ul> 
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/rust-totp/#totpshi-xian">totp实现</a>
+                 <ul>
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/rust-totp/#yuan-li">原理</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/rust-totp/#dai-ma-1">代码</a>
+                        </li>
+                        
+                    
+                </ul> 
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/rust-totp/#gai-jin">改进</a>
+                 <ul>
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/rust-totp/#mo-kuai-hua">模块化</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/rust-totp/#you-hua">优化</a>
+                        </li>
+                        
+                    
+                </ul> 
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/rust-totp/#can-kao-lian-jie">参考链接</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>rust实现TOTP算法（Base32加密）</h1>
+    </header>
+    <div class="content">
+        <p>公司用来进行二次验证登陆的方式是TOTP，全称是_Time-based One-Time Password algorithm_。维基百科上对与TOTP的说明的十分详细：<a href="https://zh.wikipedia.org/wiki/%E5%9F%BA%E4%BA%8E%E6%97%B6%E9%97%B4%E7%9A%84%E4%B8%80%E6%AC%A1%E6%80%A7%E5%AF%86%E7%A0%81%E7%AE%97%E6%B3%95">基于时间的一次性密码算法</a> 从这里我们可以找到我们需要实现一个totp可能需要用到的要素：epoch，time step，密钥，加密哈希算法等。还有实现_totp_的基本原理。事实上对比一些别的实现，我们也可以知道中文维基上的有错误之处。</p>
+<p>这一次我将记录我实现totp算法的过程以及遇到的坑。</p>
+<p>这一次实现的代码可以在我的Github中找到。Github: <a href="https://github.com/kingrongH/totp">totp</a></p>
+<span id="continue-reading"></span><h2 id="base32shi-xian">Base32实现</h2>
+<p>我们从分析TOTP的密钥开始，去实现一个TOTP算法。拿到一串密钥，它一般可能是长这个样子的：<code>XW7HPZJ2L3AMPWQN</code>。你应该想这是一串密钥，它经过什么处理呢。熟悉密码学的你可能一眼就看出来这串密钥经过怎么样的编码处理，这串密钥应该是经过Base32编码。不过看不出来也没关系，去网络上搜一搜我们也知道一般情况下，totp算法鼓励密钥以Base32编码展示。</p>
+<p>这个时候我们应该去找Base32编码解码的crate了。我碰巧知道一个较为成熟的rust库<a href="https://crates.io/crates/data-encoding">data-encoding</a>，你可以去这里看看，也许你想要它。但这一次，我决定自己来写Base32解码。</p>
+<h3 id="base32-alphabethe-yuan-li">Base32 alphabet和原理</h3>
+<p>查阅wiki以及网上搜罗来我们知道Base32有以下这样一个对照表，这里面出现的字母不正是我们的密钥<code>XW7HPZJ2L3AMPWQN</code>出现的所有字母嘛。对照着将这些字母写下来：</p>
+<blockquote>
+<p>[23, 22, 31, 7, 15, 25, 9, 26, 11, 27, 0, 12, 15, 22, 16, 13]</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/09/25/FuEyhzgdClPewo2.png" alt="base32_table.png" /></p>
+<p>Base32编码有以下几个要点：</p>
+<ol>
+<li>将原始数据的二进制形式拆成<em>5位一组</em></li>
+<li>再将5位一组的数据的十进制值写出来</li>
+<li>以这些十进制值对照这个表，选择对应的字母</li>
+</ol>
+<p>所以我们解码的过程也就简单了：</p>
+<ol>
+<li>根据表格将对应十进制值写出</li>
+<li>再将这些十进制值展示位5位的二进制</li>
+<li>连接这些二进制即可获得原始数据</li>
+</ol>
+<h3 id="dai-ma">代码</h3>
+<p>很可惜，在rust中我没能找到一个合适的位操作方式将十进制展现为5位的二进制并连接起来，所以在这里我们使用字符串以及rust的<code>format!</code>宏，虽然这会有一定的开销，但我们奔着实现原理来，先忽略这些细枝末节。</p>
+<ol>
+<li><code>format!</code>宏+<code>Binary</code>trait，可以完成位数补足以及二进制展示的目的。比如这里<code>format!(&quot;{:05b}&quot;, x)</code>，表示以5位二进制展示<code>x</code>值，并对不足用0补足。</li>
+<li>对于合并后的bits，我使用<code>Vec</code>的<code>chunks</code>方法，分隔成8位一组写入一个全新的<code>Vec&lt;u8&gt;</code>当作原始数据返回，即是编码前的数据。</li>
+<li>由于整个过程中出现了多次字符串和u8之间的转换，以及可能的非正常base32字母，我将他们封装到一个错误类型<code>ParseError</code>中了</li>
+<li>字母表和十进制值之间的映射采用了粗暴了ASCII值的加减操作完成</li>
+</ol>
+<pre style="background-color:#1e1e1e;">
+<code class="language-rust" data-lang="rust"><span style="color:#569cd6;">pub fn </span><span style="color:#dcdcdc;">base32_to_secret(s: </span><span style="color:#569cd6;">&amp;str</span><span style="color:#dcdcdc;">) -&gt; Result&lt;Vec&lt;</span><span style="color:#569cd6;">u8</span><span style="color:#dcdcdc;">&gt;, ParseError&gt; {
+    </span><span style="color:#569cd6;">let mut</span><span style="color:#dcdcdc;"> all_bits = String::new();
+    </span><span style="color:#569cd6;">for</span><span style="color:#dcdcdc;"> b </span><span style="color:#569cd6;">in</span><span style="color:#dcdcdc;"> s.bytes() {
+        </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> x:</span><span style="color:#569cd6;">u8</span><span style="color:#dcdcdc;">;
+        </span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;"> b &gt;= </span><span style="color:#b5cea8;">65 </span><span style="color:#569cd6;">&amp;&amp; </span><span style="color:#dcdcdc;">b&lt;=90 </span><span style="color:#ff3333;">{
+</span><span style="color:#dcdcdc;">            x = b-</span><span style="color:#b5cea8;">65</span><span style="color:#dcdcdc;">;
+        } </span><span style="color:#569cd6;">else if</span><span style="color:#dcdcdc;"> b &gt;= </span><span style="color:#b5cea8;">50 </span><span style="color:#569cd6;">&amp;&amp; </span><span style="color:#dcdcdc;">b&lt;= 55 </span><span style="color:#ff3333;">{
+</span><span style="color:#dcdcdc;">            x = b-</span><span style="color:#b5cea8;">50</span><span style="color:#dcdcdc;">+</span><span style="color:#b5cea8;">26</span><span style="color:#dcdcdc;">;
+        } </span><span style="color:#569cd6;">else </span><span style="color:#dcdcdc;">{
+            </span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">Err(ParseError::InvalidBase32Char);
+        }
+        </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> bits = format!(</span><span style="color:#d69d85;">&quot;</span><span style="color:#b4cea8;">{:05b}</span><span style="color:#d69d85;">&quot;</span><span style="color:#dcdcdc;">, x); 
+        all_bits.push_str(</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">bits);
+    }
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> all_chars:Vec&lt;</span><span style="color:#569cd6;">char</span><span style="color:#dcdcdc;">&gt; = all_bits.chars().collect();
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> all_u8:Result&lt;Vec&lt;</span><span style="color:#569cd6;">u8</span><span style="color:#dcdcdc;">&gt;, </span><span style="color:#569cd6;">_</span><span style="color:#dcdcdc;">&gt; = all_chars.chunks(</span><span style="color:#b5cea8;">8</span><span style="color:#dcdcdc;">).map(|chunk| {
+        </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> s:String = chunk.iter().collect();
+        </span><span style="color:#569cd6;">u8</span><span style="color:#dcdcdc;">::from_str_radix(</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">s, </span><span style="color:#b5cea8;">2</span><span style="color:#dcdcdc;">)
+    }).collect();
+    Ok(all_u8</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">)
+} 
+</span></code></pre>
+<p>如果你有更好的操作方式，请你评论告诉我。</p>
+<h2 id="totpshi-xian">totp实现</h2>
+<p>先前说到，totp实现有几个要素：epoch，time step，哈希加密算法，密钥等。但我们可以从一个default开始，因为万事总有一个default，维基百科上说，默认time step是30s，默认的哈希加密方式为_SHA1_，我还知道很多二次验证默认的epoch就是UNIX_TIME_EPOCH，即从1970年0点0分开始计算的秒数。</p>
+<p>那么我们可以开始写这样一个算法了。</p>
+<p>wiki上是这么说的：</p>
+<p><img src="https://i.loli.net/2019/09/25/3M8kShGgFarxOuW.png" alt="totp.png" /></p>
+<h3 id="yuan-li">原理</h3>
+<p>原理可以阐述为：</p>
+<ol>
+<li>从开始时间到当前时间的time step 个数就是C</li>
+<li>使用HMAC计算以C为消息，密钥为密钥的哈希值H</li>
+<li>取得到的哈希值H<strong>最后的4位</strong>为offset</li>
+<li>从offset字节开始在H中取4个字节，并抛弃最高位，将剩余的位存为u32 I</li>
+<li>取十进制I中后6个数作为密码</li>
+</ol>
+<p><strong>注意：<strong>这里阐述的原理已经和wiki上是不一样的了，我们取的不是4个位而是</strong>4个字节</strong>，将4个位存为u32本身就不太合理了。</p>
+<h3 id="dai-ma-1">代码</h3>
+<pre style="background-color:#1e1e1e;">
+<code class="language-rust" data-lang="rust"><span style="color:#569cd6;">pub fn </span><span style="color:#dcdcdc;">get_code(secret: </span><span style="color:#569cd6;">&amp;str</span><span style="color:#dcdcdc;">) -&gt; Result&lt;</span><span style="color:#569cd6;">u32</span><span style="color:#dcdcdc;">, ParseError&gt;{
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> time_count:</span><span style="color:#569cd6;">i64 </span><span style="color:#dcdcdc;">= ((Utc::now().timestamp_millis() </span><span style="color:#569cd6;">as f64</span><span style="color:#dcdcdc;">/</span><span style="color:#b5cea8;">1000.0 </span><span style="color:#dcdcdc;">+ </span><span style="color:#b5cea8;">0.5</span><span style="color:#dcdcdc;">)/</span><span style="color:#b5cea8;">30</span><span style="color:#dcdcdc;">) </span><span style="color:#569cd6;">as i64</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> key = base32_to_secret(secret)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let mut</span><span style="color:#dcdcdc;"> hmac = Hmac::new(Sha1::new(), </span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">key);
+    hmac.input(</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">time_count.to_be_bytes());
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> result = hmac.result();
+     </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> code = result.code().to_vec()
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> offset = (code.last().unwrap() </span><span style="color:#569cd6;">&amp; </span><span style="color:#b5cea8;">0x0f</span><span style="color:#dcdcdc;">) </span><span style="color:#569cd6;">as usize</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let mut</span><span style="color:#dcdcdc;"> otp = (</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">code[offset</span><span style="color:#569cd6;">..</span><span style="color:#dcdcdc;">offset+</span><span style="color:#b5cea8;">4</span><span style="color:#dcdcdc;">]).to_vec();
+    otp[</span><span style="color:#b5cea8;">0</span><span style="color:#dcdcdc;">] = otp[</span><span style="color:#b5cea8;">0</span><span style="color:#dcdcdc;">] </span><span style="color:#569cd6;">&amp; </span><span style="color:#b5cea8;">0x7f</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> hex:String = otp.iter().map(|chunk| {
+        format!(</span><span style="color:#d69d85;">&quot;</span><span style="color:#b4cea8;">{:02X}</span><span style="color:#d69d85;">&quot;</span><span style="color:#dcdcdc;">, chunk)
+    }).collect();
+    Ok(</span><span style="color:#569cd6;">u32</span><span style="color:#dcdcdc;">::from_str_radix(</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">hex, </span><span style="color:#b5cea8;">16</span><span style="color:#dcdcdc;">)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">%</span><span style="color:#b5cea8;">1000000</span><span style="color:#dcdcdc;">)
+}
+</span></code></pre>
+<p>以上的代码就是一个default的TOTP算法的实现。我们使用了<code>rust-crypto</code> crate（<a href="https://crates.io/crates/rust-crypto">rust-crypto</a>），按照wiki上的介绍，我使用了hmac算法，使用我们的密钥作为key，使用默认的30秒time step以及unix epoch起始计算出来的time count作为消息。使用SHA1作为hash加密算法后，对取得的哈希值我们取最后的四个位作为offset，然后从offset开始取四个字节，将取得的结果转换为十进制，并取后六位作为我们最终的密码。</p>
+<p>实际中我们就是拿这样一个六位的密码进行相应的校验的。</p>
+<h2 id="gai-jin">改进</h2>
+<p>这个时候我们应该是已经达到我们自己的目的了，我们可以通过，更改加密算法，time step以及时间起点等来获得我们想要的不同情形下的totp算法实现。但是实际上我们却不能总是靠改代码来实现，我们可以根据哪些是可变的量做相应的更改，将这个totp算法实现变成一个模块化可以复用的crate，甚至可以将它上传到<code>crates.io</code>中。</p>
+<h3 id="mo-kuai-hua">模块化</h3>
+<p>根据wiki我做了一些评估，我觉得：</p>
+<ol>
+<li>base32编码是可选的</li>
+<li>time step，start time以及加密方式是可以变更的。</li>
+<li>secret 是可变的</li>
+</ol>
+<p>所以如果要实现一个模块化的totp算法，那么base32编码不应该在算法计算过程中，但是可以写一个功能性的关联函数来达到编码。至于剩下的一些可变的量，我们可以创建一个<code>TOTP</code>结构体，像这样：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-rust" data-lang="rust"><span style="color:#569cd6;">pub struct </span><span style="color:#dcdcdc;">TOTP {
+    secret: String,
+    time_step: </span><span style="color:#569cd6;">f64</span><span style="color:#dcdcdc;">, 
+    epoch_start: </span><span style="color:#569cd6;">i64</span><span style="color:#dcdcdc;">,
+    encryption: Encryption,
+}
+</span></code></pre>
+<p>其中<code>Encryption</code>可以是一个枚举。</p>
+<p>设计好这个结构体，我们可以评估以下应包含哪些方法：</p>
+<ol>
+<li><code>new</code> 传入各种字段，创建一个<code>TOTP</code>实例</li>
+<li><code>default</code> 传入<code>secret</code>创建一个默认设置的<code>TOTP</code>实例</li>
+<li><code>get_code</code> 核心方法，获得六位数的结果，包含我们的计算过程</li>
+</ol>
+<p>当然具体这个模块实现下来也不是轻而易举的，我们需要考虑诸如入参出参类型和错误处理等。
+具体实现请移步github：<a href="https://github.com/kingrongH/totp">rust totp</a></p>
+<h3 id="you-hua">优化</h3>
+<p>当然另一个改进的方向就是性能的优化，其中一个重要的点就是，我在这个过程中许多的位操作都是使用字符串来完成的，可以有一个直接操作位的方式来达到这个目的，使用<code>unsafe</code>代码当然应当可以达到这个目的，那么有没有不用<code>unsafe</code>的方式，这个是有待商榷的。</p>
+<p>还有一个自然而然就是文档了，文档应当是这个模块的重要组成部分。</p>
+<h2 id="can-kao-lian-jie">参考链接</h2>
+<ol>
+<li><a href="https://zh.wikipedia.org/wiki/%E5%9F%BA%E4%BA%8E%E6%97%B6%E9%97%B4%E7%9A%84%E4%B8%80%E6%AC%A1%E6%80%A7%E5%AF%86%E7%A0%81%E7%AE%97%E6%B3%95">基于时间的一次性密码算法</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Base32">base32 wiki</a></li>
+<li><a href="https://docs.rs/rust-crypto/0.2.36/">rust-crypto document</a></li>
+</ol>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date">25 September 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/rust/">Rust</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/rust/">#rust</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/totp/">#totp</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/base32/">#base32</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

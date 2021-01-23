@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>使用JavaScript来判断质数</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/prime-number-javascript/#guan-yu">关于</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/prime-number-javascript/#dai-ma">代码</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/prime-number-javascript/#zong-jie">总结</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>使用JavaScript来判断质数</h1>
+    </header>
+    <div class="content">
+        <h2 id="guan-yu">关于</h2>
+<p>使用<code>JavaScript</code>判断一个数是否为质数
+质数即是除了他本身更和<code>1</code>这两个公约数之外没有别的公约数的数。</p>
+<h2 id="dai-ma">代码</h2>
+<pre style="background-color:#1e1e1e;">
+<code>'use strict';
+function priN(x){
+	if (x &lt; 2) return false;
+	else
+    	for(i=2;i*i&lt;=x;i++){
+        	if(x%i===0) return false;
+    	}
+return true;
+}
+</code></pre><h2 id="zong-jie">总结</h2>
+<p>使用的方法即是从<code>2</code> 开始遍历，直到遍历完所有可能的情况为止。如果找到了公约数则返回<code>false</code>，否则返回<code>true</code> 。</p>
+<p><strong>这里有一个值得注意的点是我们的遍历结束点是 <code>i*i&lt;=x</code></strong></p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date">17 December 2018</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/javascript/">JavaScript</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/javascript/">#JavaScript</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/algorithm/">#Algorithm</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

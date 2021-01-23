@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>Python版ssr通过链接导入节点</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/python-ssr-rss/#guan-yu">关于</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/python-ssr-rss/#zhun-bei">准备</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/python-ssr-rss/#jie-ma">解码</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/python-ssr-rss/#jie-xi">解析</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/python-ssr-rss/#bao-cun-pei-zhi">保存配置</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/python-ssr-rss/#zong-he-li-yong">综合利用</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/python-ssr-rss/#geng-jin-yi-bu">更进一步</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>Python版ssr通过链接导入节点</h1>
+    </header>
+    <div class="content">
+        <h1 id="guan-yu">关于</h1>
+<p>很多时候我们都苦于使用python版本的ssr的时候必须自己手动写入配置，所以这一次我们将使用python来进行ssr解析并导入配置。在这一节中我们需要用到许多上一节的内容，所以我建议各位看官，先移步<a href="https://www.kingr.top/2018/10/07/ssr-decode/">ssr和ss链接解密</a></p>
+<p>本节所有代码都可以在我的<a href="https://github.com/kingrongH/shadowsocksr/tree/manyuser/shadowsocks/RSS">github</a>中找到。</p>
+<h1 id="zhun-bei">准备</h1>
+<p>首先我们需要知道ssr或者ss的链接是怎样加密的，在前一节中我们解析了ssr链接的加密过程，我们知道了ssr链接是通过<code>Base64</code>的编码方式进行加密的。所以在这一次试验中我们需要用到的主要的库就是<code>base64</code>和<code>re</code>，这两个库一般linux的python环境中都自动安装了，如果你出现了<code>no module nameed ***</code>的问题，那么可以使用<code>pip</code>安装一下。</p>
+<pre style="background-color:#1e1e1e;">
+<code>import base64
+import re
+import json
+</code></pre><h1 id="jie-ma">解码</h1>
+<p>在上一节中我们使用的在线的<code>Base64</code>解码工具进行解码的，这一次我们需要使用Python的<code>base64</code>这个库，官方使用文档在此：<a href="https://docs.python.org/3/library/base64.html">Base64官方文档</a>。这个库的使用方式十分简单，我们一般会使用到的是这个库的两个函数：<code>url_safe_base64decode(s)</code>和<code>base64_decode(s)</code>，传入我们需要解码的对象，然后返回的是解码后的<code>byte</code>类型的字符。</p>
+<p>在这里我们需要特别注意的是我们传入的s的长度必须为4的倍数，这一点在上一节中我们实际上已经谈到过了。不再多说直接上代码</p>
+<pre style="background-color:#1e1e1e;">
+<code>def decoe(s):
+  num = len(s)%4
+  if num==0:
+    s = base64.url_safe_base64decode(s)
+  else:
+    s = s + '#'*(4-num)
+    s = base64.url_safe_base64decode(s)
+
+    return s
+</code></pre>
+<p>这样一个简单的base64 针对url的解码函数就出炉了，因为我们的ssr链接是需要使用在浏览器地址栏的，所以我们需要使用针对url的函数。</p>
+<h1 id="jie-xi">解析</h1>
+<p>完成了解码函数之后我们需要对我们的ssr链接进行解析了。我们需要得到的是一个由配置组成的字典例如：</p>
+<pre style="background-color:#1e1e1e;">
+<code>config = {
+    &quot;server&quot;: &quot;0.0.0.0&quot;,
+    &quot;server_ipv6&quot;: &quot;::&quot;,
+    &quot;server_port&quot;: 8388,
+    &quot;local_address&quot;: &quot;127.0.0.1&quot;,
+    &quot;local_port&quot;: 1080,
+
+    &quot;password&quot;: &quot;m&quot;,
+    &quot;method&quot;: &quot;aes-128-ctr&quot;,
+    &quot;protocol&quot;: &quot;auth_aes128_md5&quot;,
+    &quot;protocol_param&quot;: &quot;&quot;,
+    &quot;obfs&quot;: &quot;tls1.2_ticket_auth_compatible&quot;,
+    &quot;obfs_param&quot;: &quot;&quot;
+}
+</code></pre>
+<p>利用解码函数我们可以得到我们的每一个参数，然后存入字典中，参照上一节的文档我们需要对这个链接进行多次解码，代码如下：</p>
+<pre style="background-color:#1e1e1e;">
+<code>def Analyze(s):
+     config = {
+    &quot;server&quot;: &quot;0.0.0.0&quot;,
+    &quot;server_ipv6&quot;: &quot;::&quot;,
+    &quot;server_port&quot;: 8388,
+    &quot;local_address&quot;: &quot;127.0.0.1&quot;,
+    &quot;local_port&quot;: 1080,
+
+    &quot;password&quot;: &quot;m&quot;,
+    &quot;method&quot;: &quot;aes-128-ctr&quot;,
+    &quot;protocol&quot;: &quot;auth_aes128_md5&quot;,
+    &quot;protocol_param&quot;: &quot;&quot;,
+    &quot;obfs&quot;: &quot;tls1.2_ticket_auth_compatible&quot;,
+    &quot;obfs_param&quot;: &quot;&quot;
+  }
+
+  #第一次解码
+  s = decode(s)
+  spilted = re.spilt(':',s)  #将多个参数分离开来
+  pass_param = spilted[5]
+  pass_param_spilted = re.spilt('\/\?',pass_param)
+  passwd = decode(pass_param_spilted[0]) #解码得到password
+
+  #匹配param、remarks和group
+  try:
+    obfs_param = re.search(r'obfsparam=([^&amp;]+)',pass_param_spilted[1]).group[1]
+  except:
+    obfs_param=&quot;&quot;
+  try:
+    protocol_param = re.search(r'protoparam=([^&amp;]+)', pass_param_spilted[1])
+    protocol_param = decode(protocol_param)
+  except:
+    protocol_param = ''
+  try:
+    remarks = re.search(r'remarks=([^&amp;]+)', pass_param_spilted[1]).group(1)
+    remarks = decode(remarks)
+  except:
+    remarks = ''
+  try:
+    group = re.search(r'group=([^&amp;]+)', pass_param_spilted[1]).group(1)
+    group = decode(group)
+  except:
+    group = ''
+    
+    #将各个值赋值入字典中
+
+  config['server'] = spilted[0]
+  config['server_port'] = int(spilted[1])
+  config['password'] = passwd
+  config['method'] = spilted[3]
+  config['protocol'] = spilted[2]
+  config['obfs'] = spilted[4]
+  config['protocol_param'] = protocol_param
+  config['obfs_param'] = obfs_param
+  
+  return [config,group,remarks]
+</code></pre>
+<p>这些代码大致还原了我们在上一节中使用在线工具解析的过程，其中我们可以看见，在匹配参数的过程中我们一直在使用<code>try...except...</code>，这是因为并不是所有的ssr链接中都包含了这些信息，如果不包含，我们就可以将它赋值为空文本。</p>
+<h1 id="bao-cun-pei-zhi">保存配置</h1>
+<p>在python版本的ssr的使用中我们一般是使用<code>python local.py -c ***.json -d start</code> 命令来完成ssr的启动的。所以我们为了便捷和进一步开发的需要需要将我们的配置保存为<code>*.json</code>，使用<code>json</code>库，<a href="https://docs.python.org/3/library/json.html">官方文档</a></p>
+<pre style="background-color:#1e1e1e;">
+<code>def save_as_json(d,name='conf'):
+
+  #直接调用解析函数
+  [data_dict,group,remarks] = Analyze(d)
+  json_str = json.dumps(data_dict)
+
+  #保存在config目录下
+  with open('config/'+naem+'.json','w') as f:
+    json.dump(data_dict,f)
+</code></pre><h1 id="zong-he-li-yong">综合利用</h1>
+<p>我们直接使用在终端输入的方式来获取ssr链接，然后进一步进行解析保存到相应的目录下，这里需要注意一点就是我们的所有使用的ssr code 都是去除了<code>ssr://</code>前缀的。</p>
+<pre style="background-color:#1e1e1e;">
+<code>if __name__ == &quot;__main__&quot;:
+  ssr = input('ssr link:')
+  code = ssr[6:]
+  name = input('config name:')
+  try:
+      save_as_json(code,name)
+      print(&quot;Successful:please check config at \'config/\'&quot;)
+  except:
+      print(&quot;Error:Fail to save config!&quot;)
+</code></pre><h1 id="geng-jin-yi-bu">更进一步</h1>
+<p>将这一切做好之后，我们将获得一个可以通过ssr链接导入节点配置的程序，然而在使用过程中还是稍显麻烦，我觉得主要有以下几点值得进一步地探索：</p>
+<ul>
+<li>文件的名字还是自定义的，能不能通过我们获得的group和remarks信息完成对保存的名字和文件夹的自动设定呢</li>
+<li>能不能进一步完成ssr的订阅功能呢，像其他客户端一样。</li>
+</ul>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date"> 8 October 2018</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/python/">Python</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/shadowsocksr/">#shadowsocksr</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/shadowsocks/">#shadowsocks</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

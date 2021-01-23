@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>Rust 错误处理探索</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/rust-error-handle/#jian-dan-chu-li">简单处理</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/rust-error-handle/#gao-ji">高级</a>
+                 <ul>
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/rust-error-handle/#jie-shao">介绍</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/rust-error-handle/#an-li">案例</a>
+                        </li>
+                        
+                    
+                </ul> 
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/rust-error-handle/#can-kao-lian-jie">参考链接</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>Rust 错误处理探索</h1>
+    </header>
+    <div class="content">
+        <p>从JavaScript，从Java，从Python甚至是从C过来，都会不习惯_Rust_的错误处理方式。但这不是rust限制了你错误处理的方式。事实上rust提供了很大的自由度来进行错误处理，灵活的方式。</p>
+<p>对于Rust来说，<code>Option</code>和<code>Result</code>很大程度上造成了你在错误处理上的不适感。</p>
+<p>要熟练地使用这些方式并不简单，但当你熟练之后，你应当会十分地enjoy这个过程。</p>
+<p>这篇博客简单记录了一下我最近遇到的错误处理的方式。</p>
+<span id="continue-reading"></span><h2 id="jian-dan-chu-li">简单处理</h2>
+<ul>
+<li><code>unwrap()</code></li>
+<li><code>expect()</code></li>
+</ul>
+<p>对我来说，最为直接而简单的处理<code>Option</code>和<code>Result</code>的方式就是<code>unwarp()</code>，这种方式给你一种在其他语言中编程的体验，但是总是使用这种方式并不是很好的选择。如果你并不能确定你的代码会得到什么样的结果，那么最好不要在生产环境中使用这种方式。</p>
+<p>但是有一些时候我们可以毫不犹豫地使用这种方式——但是确定这是什么结果的时候。比如说：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-rust" data-lang="rust"><span style="color:#569cd6;">use </span><span style="color:#dcdcdc;">regex::Regex;
+</span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> gender_re = Regex::new(</span><span style="color:#569cd6;">r</span><span style="color:#d69d85;">&quot;input\[name=&#39;sexs&#39;\]\[value=&#39;(.+?)&#39;\]&quot;</span><span style="color:#dcdcdc;">).unwrap();
+</span></code></pre>
+<p>另外我觉得也可以在项目开发和测试过程中使用<code>unwrap()</code>或者<code>expect</code>来处理，来快速看看结果是否符合预期以及获得一些简单的提示。</p>
+<h2 id="gao-ji">高级</h2>
+<ul>
+<li><code>ok_or()</code>和<code>map_err()</code></li>
+<li><code>dyn std::error::Error</code></li>
+<li><code>?</code>运算符</li>
+<li>新建错误类型和包装错误</li>
+</ul>
+<h3 id="jie-shao">介绍</h3>
+<p>我非常喜欢像<code>ok_or</code>、<code>map_err</code>等的方式，来转换错误。</p>
+<ul>
+<li><code>ok_or()</code>将<code>Option&lt;T&gt;</code>转换为<code>Result&lt;T, Err&gt;</code>。</li>
+<li><code>map_err()</code>将<code>Result&lt;T, E&gt;</code> 转换为<code>Result&lt;T, F&gt;</code>，即转换为另一个错误类型。</li>
+</ul>
+<p>这两种方式结合自定义错误和<code>?</code>运算符以及自定义的错误可以写出非常简洁的代码。很多时候我们并不喜欢写大段的<code>match</code>，虽然我们很喜欢<code>match</code>语法。</p>
+<p><code>dyn std::error::Error</code> 方式很强大，你给任何一个实现了<code>std::error::Error</code> _trait_的错误，它都照单全收。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-rust" data-lang="rust"><span style="color:#569cd6;">fn </span><span style="color:#dcdcdc;">some_fn(param: Result&lt;</span><span style="color:#569cd6;">&amp;str</span><span style="color:#dcdcdc;">, </span><span style="color:#569cd6;">&amp;str</span><span style="color:#dcdcdc;">&gt;) -&gt; Result&lt;</span><span style="color:#569cd6;">i32</span><span style="color:#dcdcdc;">, Box&lt;dyn std::error::Error&gt;&gt; {
+    </span><span style="color:#569cd6;">match</span><span style="color:#dcdcdc;"> param {
+        Ok(n) </span><span style="color:#569cd6;">=&gt;</span><span style="color:#dcdcdc;"> n.parse::&lt;</span><span style="color:#569cd6;">i32</span><span style="color:#dcdcdc;">&gt;()</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">,
+        Err(_e) </span><span style="color:#569cd6;">=&gt; </span><span style="color:#dcdcdc;">Ok(</span><span style="color:#b5cea8;">0</span><span style="color:#dcdcdc;">),
+    }
+}
+</span></code></pre>
+<p>新建一个错误的过程十分明了：</p>
+<ul>
+<li>定义错误</li>
+<li>实现<code>std::fmt::Display</code> trait</li>
+<li>实现<code>std::error::Error</code> trait</li>
+<li>如果需要实现包装错误，实现<code>From</code>trait</li>
+</ul>
+<p>详见<a href="https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/define_error_type.html">Define an error type</a></p>
+<h3 id="an-li">案例</h3>
+<p>以下代码是我最近一次使用<code>reqwest</code>模拟登录中获取cookie的代码（网址非真实网址）。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-rust" data-lang="rust"><span style="color:#569cd6;">fn </span><span style="color:#dcdcdc;">get_cookie() -&gt; Result&lt;String, LoginError&gt; {
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> url = </span><span style="color:#d69d85;">&quot;http://www.example.com/example&quot;</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> resp = Client::new().get(url)
+        .header(</span><span style="color:#b4cea8;">USER_AGENT</span><span style="color:#dcdcdc;">, </span><span style="color:#d69d85;">&quot;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36&quot;</span><span style="color:#dcdcdc;">)
+        .send().map_err(reqwest_result_handle)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> set_cookie = resp.headers().get(</span><span style="color:#b4cea8;">SET_COOKIE</span><span style="color:#dcdcdc;">).ok_or(LoginError::NoSetCookie)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">; 
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> set_cookie = (set_cookie.to_str().map_err(|_e| LoginError::Other)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">).to_string();
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> re = Regex::new(</span><span style="color:#569cd6;">r</span><span style="color:#d69d85;">&quot;PHPSESSID=([\w\d]+?);.*&quot;</span><span style="color:#dcdcdc;">);
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> re_result = re.unwrap().captures(</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">set_cookie).ok_or(LoginError::NoSessId)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+    Ok(re_result[</span><span style="color:#b5cea8;">1</span><span style="color:#dcdcdc;">].to_string())
+}
+</span></code></pre>
+<p>其中<code>LoginError</code>是自定义的一个错误枚举，<code>reqwest_result_handle</code>是一个将_reqwest_的错误转换为<code>LoginError</code>的一个函数。以上我总共用了两次<code>map_err()</code>和两次<code>ok_or()</code>，<code>map_err</code>用来将我在使用_reqwest_过程中遇到的<code>Error</code>转换为我自定义的<code>LoginError</code>，并使用<code>?</code>直接返回，节省了许多代码；<code>ok_or</code>两次都用在返回的结果是<code>Option&lt;T&gt;</code>的时候，我们不希望草率的用<code>unwrap()</code>来完成这样一个操作，我们新建了两个不同的错误来接受不存在的结果，并使用<code>?</code>直接返回。</p>
+<p>以上两者如果全程使用<code>match</code>语法来操作，那有可能会是一个mess的火葬场，不信你试试。</p>
+<h2 id="can-kao-lian-jie">参考链接</h2>
+<ul>
+<li><a href="https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/define_error_type.html">Define Error Type</a></li>
+<li><a href="https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/boxing_errors.html">Boxing Errors</a></li>
+<li><a href="https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/wrap_error.html">Wrapping Errors</a></li>
+</ul>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date">12 September 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/rust/">Rust</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/rust/">#rust</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/error/">#error</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

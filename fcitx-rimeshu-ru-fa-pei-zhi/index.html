@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>fcitx-rime输入法配置</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/fcitx-rimeshu-ru-fa-pei-zhi/#you-lai">由来</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/fcitx-rimeshu-ru-fa-pei-zhi/#pei-zhi-ji-qiao">配置技巧</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/fcitx-rimeshu-ru-fa-pei-zhi/#tian-jia-pi-fu">添加皮肤</a>
+                 <ul>
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/fcitx-rimeshu-ru-fa-pei-zhi/#ibus-rime">ibus-rime</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/fcitx-rimeshu-ru-fa-pei-zhi/#fcitx-rime">fcitx-rime</a>
+                        </li>
+                        
+                    
+                </ul> 
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/fcitx-rimeshu-ru-fa-pei-zhi/#ci-ku-tian-jia">词库添加</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>fcitx-rime输入法配置</h1>
+    </header>
+    <div class="content">
+        <h2 id="you-lai">由来</h2>
+<p>使用rime输入已经有一段时间，但是很惭愧，一直使用的是默认的配置，配置rime输入法这件事情一直也都在日程上，至今才开始配置。</p>
+<p>对默认的配置有一下两点不满：</p>
+<ul>
+<li>皮肤太丑</li>
+<li>词库不全</li>
+</ul>
+<p>在这一次配置中着重解决以上两个问题。</p>
+<h2 id="pei-zhi-ji-qiao">配置技巧</h2>
+<p>在 <code>~/.config/fcitx/rime/</code> 目录下新建 <code>default.custom.yaml</code> 将你需要更改的配置由<code>default.yaml</code> 复制到其中的 <code>patch:</code> 下，rime会优先考虑补丁(patch)里的设置，如：</p>
+<pre style="background-color:#1e1e1e;">
+<code>patch:
+
+  schema_list:
+    - schema: luna_pinyin
+    - schema: luna_pinyin_fluency
+#    - schema: bopomofo
+#    - schema: bopomofo_tw 
+#    - schema: cangjie5
+#    - schema: stroke
+#    - schema: terra_pinyin
+
+
+menu/page_size: 6
+</code></pre>
+<p>具体的某个输入法的设置可以依法炮制，比如新建 <code>luna_pinyin.custom.yaml</code></p>
+<pre style="background-color:#1e1e1e;">
+<code>patch:
+
+  switches:
+    - name: ascii_mode
+      reset: 0
+    states: [ 中文, 西文 ]
+    - name: full_shape
+      states: [ 半角, 全角 ]
+    - name: simplification
+      reset: 1
+      states: [ 漢字, 汉字 ]
+    - name: ascii_punct
+      states: [ 。，, ．， ] 
+</code></pre>
+<p>这种做法可以让我们在轻松的保存自己的配置，以便进行同步。</p>
+<h2 id="tian-jia-pi-fu">添加皮肤</h2>
+<p>因为看着默认的fcitx的皮肤太丑，共有三个选项：<code>dark</code>、<code>default</code>和<code>classic</code>，任何一个都不让人满意。所以在网络上找了许多资料配置皮肤。</p>
+<h3 id="ibus-rime">ibus-rime</h3>
+<p>ibus-rime的皮肤配置写入如下文件就好</p>
+<p><code>~/.config/ibus/rime/default.custom.yaml</code></p>
+<p>记录一个配置皮肤的网页工具：</p>
+<p><code>https://rime.netlify.com/</code></p>
+<h3 id="fcitx-rime">fcitx-rime</h3>
+<p>在fcitx下尝试了很多遍修改配置的方法并不奏效，所以我觉得fcitx的皮肤配置与输入法是分离的，可以调整fcitx的皮肤但是不能调整输入法的皮肤。</p>
+<p>方式：</p>
+<p>下载皮肤配置文件并复制到目录 <code>~/.config/fcitx/skin/</code>下就可以切换了。</p>
+<p>推荐皮肤：</p>
+<ol>
+<li>
+<p><code>fcitx-skin-material</code>
+arch下可以直接使用<code>pacman -S fcitx-skin-material</code>进行安装。</p>
+</li>
+<li>
+<p><code>mantis</code></p>
+</li>
+</ol>
+<pre style="background-color:#1e1e1e;">
+<code>git clone https://github.com/fcitx/fcitx-artwork
+cd fcitx-artwork
+cp -r skin ~/.config/fcitx/
+</code></pre><h2 id="ci-ku-tian-jia">词库添加</h2>
+<p>使用的工具 <code>深蓝词库转换</code>：</p>
+<p><code>https://github.com/studyzy/imewlconverter</code></p>
+<p>下载该工具用wine运行，或者在windows下运行。</p>
+<p>然后下载你所需要的搜狗细胞词库：</p>
+<p><code>https://pinyin.sogou.com/dict/cate/index/</code></p>
+<p>导入到 <code>深蓝词库转换</code>然后转换为 <code>Rime输入法</code> 格式。
+将转换后的内容写在以 <code>***.dict.yaml</code> 命名的文件中，如：</p>
+<pre style="background-color:#1e1e1e;">
+<code># luna_pinyin
+# Rime dictionary 计算机
+# encoding: utf-8
+
+---
+name: luna_pinyin.computer
+version: &quot;2018.08.18&quot;
+sort: by_weight
+use_preset_vocabulary: true
+import_tables:
+  - luna_pinyin
+  - luna_pinyin.computer
+...
+
+阿姆达尔定律	a mu da er ding lv	1
+阿帕网	a pa wang	1
+埃尔布朗基	ai er bu lang ji	1
+埃尔米特函数	ai er mi te han shu	1
+埃克特	ai ke te	1
+</code></pre>
+<p>其中以下部分需要自己添加，乃格式所需不可缺少。</p>
+<pre style="background-color:#1e1e1e;">
+<code>---
+name: luna_pinyin.computer
+version: &quot;2018.08.18&quot;
+sort: by_weight
+use_preset_vocabulary: true
+import_tables:
+  - luna_pinyin
+  - luna_pinyin.computer
+...
+</code></pre>
+<p>然后将该文件复制到 <code>~/.config/fcitx/rime/</code> 下，在 <code>luna_pinyin.custom.yaml</code> 中添加以下内容即可</p>
+<pre style="background-color:#1e1e1e;">
+<code>#添加计算机词库，来自搜狗细胞词库转换而来
+translator:
+  dictionary: luna_pinyin.computer
+</code></pre>
+<p>添加多个词库可以依法炮制，或者将多个词库合并为同一个词库。重新部署，这个时候尝试一下输入词库中的内容，你会发现已经可以了。 </p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date">18 August 2018</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/learn/">Learn</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/linux/">#linux</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/rime/">#rime</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/fcitx-rime/">#fcitx-rime</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

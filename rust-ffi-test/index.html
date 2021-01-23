@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>尝试rust ffi，rust调用clang</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/rust-ffi-test/#bian-xie-yi-ge-c-bing-bian-yi-wei-ku">编写一个c，并编译为库</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/rust-ffi-test/#bian-xie-main-rs">编写main.rs</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/rust-ffi-test/#bian-yi-main-rs">编译main.rs</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/rust-ffi-test/#shi-yong-cargo-bian-yi">使用cargo 编译</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/rust-ffi-test/#can-kao">参考</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>尝试rust ffi，rust调用clang</h1>
+    </header>
+    <div class="content">
+        <p>最近试图想用rust做一个小工具，但是rust上目前还没有对应的库，而C语言中有对应的库。想尝试使用这个库，我需要先了解一下rust ffi（Foreign Function Interface）。</p>
+<p>要想将rust的ffi应用到一整个库上，首先我们先从一个文件做起。</p>
+<p>这篇文章就是对rust ffi 一次小小尝试的记录。</p>
+<span id="continue-reading"></span><h2 id="bian-xie-yi-ge-c-bing-bian-yi-wei-ku">编写一个c，并编译为库</h2>
+<p>我们在一个新建的rust项目的src目录下，新建一个<code>add.c</code>。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-c" data-lang="c"><span style="color:#608b4e;">//src/add.c
+</span><span style="color:#569cd6;">int </span><span style="color:#dcdcdc;">add(</span><span style="color:#569cd6;">int </span><span style="color:#dcdcdc;">a, </span><span style="color:#569cd6;">int </span><span style="color:#dcdcdc;">b) {
+    </span><span style="color:#569cd6;">return</span><span style="color:#dcdcdc;"> a+b;
+}
+</span></code></pre>
+<p>在命令行中执行：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-shell" data-lang="shell"><span style="color:#dcdcdc;">clang -c add.c -o libadd.a
+</span></code></pre>
+<p>将我们新建的c文件编译为一个可以被引入的库文件。现在我们<code>src</code>目录下结构就是这样的:</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-file" data-lang="file"><span style="color:#dcdcdc;">- src
+    - add.c
+    - libadd.a
+    - main.rs
+</span></code></pre><h2 id="bian-xie-main-rs">编写main.rs</h2>
+<p>我们如果想要在<code>main.rs</code>中调用我们在<code>add.c</code>中定义的add函数，我们需要将它引入，并且在<code>unsafe</code>代码块中使用。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-rust" data-lang="rust"><span style="color:#569cd6;">use </span><span style="color:#dcdcdc;">std::os::raw::</span><span style="color:#569cd6;">c_int</span><span style="color:#dcdcdc;">;
+
+</span><span style="color:#569cd6;">extern </span><span style="color:#dcdcdc;">{
+    </span><span style="color:#569cd6;">fn </span><span style="color:#dcdcdc;">add(a, c_int, b: c_int) -&gt; c_int;
+}
+
+</span><span style="color:#569cd6;">fn </span><span style="color:#dcdcdc;">main() {
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> result = </span><span style="color:#569cd6;">unsafe </span><span style="color:#dcdcdc;">{ add(</span><span style="color:#b5cea8;">1</span><span style="color:#dcdcdc;">, </span><span style="color:#b5cea8;">2</span><span style="color:#dcdcdc;">) };
+    println!(</span><span style="color:#d69d85;">&quot;1 + 2 = </span><span style="color:#b4cea8;">{}</span><span style="color:#d69d85;">&quot;</span><span style="color:#dcdcdc;">，result);
+}
+</span></code></pre><h2 id="bian-yi-main-rs">编译main.rs</h2>
+<p>也许这个时候，你会试图想要用<code>cargo run</code>来运行你的代码。但是这是行不通的，会报<code>undefined reference</code>错误。因为cargo并不知道我们，我们需要链接的库文件在哪里。</p>
+<p>试一试这个：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-shell" data-lang="shell"><span style="color:#dcdcdc;">rustc main.rs -L. -ladd &amp;&amp; ./main
+</span></code></pre>
+<p>你可以看到输出了：</p>
+<pre style="background-color:#1e1e1e;">
+<code><span style="color:#dcdcdc;">1 + 2 = 3
+</span></code></pre>
+<p>我们可以使用<code>rustc --help</code>查看<code>-L</code>和<code>-l</code> flag分别代表着什么。</p>
+<ul>
+<li><code>-L</code> 添加lib搜寻的目录</li>
+<li><code>-l</code> 添加lib</li>
+</ul>
+<h2 id="shi-yong-cargo-bian-yi">使用cargo 编译</h2>
+<p>想要用<code>cargo</code>编译，需要在项目根目录下新建一个<code>build.rs</code></p>
+<p>cargo 会读取<code>build.rs</code>的输出，来设置我们编译时的配置</p>
+<p>在这里我们最小化的一个main.rs就是长这样的</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-rust" data-lang="rust"><span style="color:#608b4e;">//build.rs
+</span><span style="color:#569cd6;">fn </span><span style="color:#dcdcdc;">main() {
+    println!(</span><span style="color:#d69d85;">&quot;cargo:rustc-link-search=./src&quot;</span><span style="color:#dcdcdc;">);
+    println!(</span><span style="color:#d69d85;">&quot;cargo:rustc-link-lib=add&quot;</span><span style="color:#dcdcdc;">);
+}
+</span></code></pre>
+<p>具体更多的可以被<code>cargo</code>识别的配置可以在这里找到：<a href="https://doc.rust-lang.org/cargo/reference/build-scripts.html">build script</a></p>
+<h2 id="can-kao">参考</h2>
+<ul>
+<li><a href="https://s3.amazonaws.com/temp.michaelfbryan.com/linking/index.html">Linking and Building</a></li>
+<li><a href="https://doc.rust-lang.org/cargo/reference/build-scripts.html">Build Script</a></li>
+</ul>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date"> 2 September 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/rust/">Rust</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/rust/">#rust</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/ffi/">#ffi</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

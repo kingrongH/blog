@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>tensorflow 加载自己的数据</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/load-my-own-data/#guan-yu">关于</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/load-my-own-data/#dai-ma">代码</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>tensorflow 加载自己的数据</h1>
+    </header>
+    <div class="content">
+        <h1 id="guan-yu">关于</h1>
+<p>很多时候我们学习tensorflow或者其他deeplearning的课程的时候，我们都被牵着鼻子走，使用一些捏造出来的数据，苦于不能处理我们自己。所以我们今天来尝试一下怎么加载自己的图片数据，将图片数据转换成我们通常学习的数组数据，便于应用我们学习到的深度学习的知识。</p>
+<p>我们需要使用的库有<code>os</code>、<code>np</code>、<code>cv2</code>、<code>pickle</code> 等。</p>
+<p><img src="https://i.loli.net/2018/09/04/5b8def3e54dd5.png" alt="lib" title="lib" /></p>
+<h1 id="dai-ma">代码</h1>
+<pre style="background-color:#1e1e1e;">
+<code>import numpy as np 
+import matplotlib.pyplot as plt
+import os
+import cv2
+import random
+import pickle
+
+DATADIR = &quot;./Datasets/PetImages&quot;
+CATEGORIES = ['Cat','Dog']
+IMG_SIZE = 50  #将size设置为50可以识别出物体 又降低了数组大小
+
+training_data = []
+
+def create_training_data():
+    for category in CATEGORIES:
+        path = os.path.join(DATADIR, category) # path to cats or dogs dir  
+        class_num = CATEGORIES.index(category)   #0 is cat , 1 is dog 
+        for  img in os.listdir(path):
+            try:
+                img_array = cv2.imread(os.path.join(path,img), cv2.IMREAD_GRAYSCALE)   #将图片数据转换为数组 因为颜色并不影响识别所以采用IMREAD_GRAYSCALE
+                new_array = cv2.resize(img_array, (IMG_SIZE,IMG_SIZE))
+                training_data.append([new_array,class_num])
+            except Exception as e:
+                pass
+
+create_training_data()
+random.shuffle(training_data) #将所有数据进行随机排序有助于提高训练识别水平
+
+
+X_temp = []
+y = []
+
+for feature,label in training_data:     #分离图片数据和标签信息
+    X_temp.append(feature)
+    y.append(label)
+
+X = np.array(X_temp).reshape(-1,IMG_SIZE,IMG_SIZE,1)
+
+
+#保存数据 以供下次调用或者其他程序调用
+pickle_out = open('X.pickle',&quot;wb&quot;)
+pickle.dump(X,pickle_out)
+pickle_out.close()
+
+pickle_out = open('y.pickle',&quot;wb&quot;)
+pickle.dump(y,pickle_out)
+pickle_out.close()
+
+#加载数据举例
+pickle_in = open(&quot;X.pickle&quot;,&quot;rb&quot;)
+X = pickle.load(pickle_in)
+</code></pre>
+<p><code>来源</code>： <code>[sentdex](https://pythonprogramming.net/loading-custom-data-deep-learning-python-tensorflow-keras/)</code></p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date"> 3 September 2018</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/learn/">Learn</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/tensorflow/">#tensorflow</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

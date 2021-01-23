@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>Rust 加载tensorflow模型用于预测</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/rust-load-tensorflow-model/#tensorflowmo-xing">Tensorflow模型</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/rust-load-tensorflow-model/#keras-mo-xing">Keras 模型</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>Rust 加载tensorflow模型用于预测</h1>
+    </header>
+    <div class="content">
+        <p>最近的时间做了一个项目：基于Rust的车牌图像处理，因为爱好Rust，而项目又不得不做，于是乎用Rust重新造了一个轮子，但是也不是没有什么用处，起码这个轮子变得很快并且推广了Rust在机器学习方面的应用，私心里还颇有些得意的。但是这类项目用到了深度学习，而Rust并没有纯深度学习框架的实现，所以使用tensorflow binding是较为理想的方案。</p>
+<p>本文将介绍如何使用Rust加载Tensorflow 的模型</p>
+<span id="continue-reading"></span>
+<p>多数时候我们并不直接使用Rust + Tensorflow进行训练，如果要这么做的话，岂不是白白浪费了前人给我们筑的基石，所以我们的目的限于使用Rust + Tensorflow 加载模型然后进行预测。之所以这么做是因为python用作预测的话可能并不能直接用于生产使用，因为速度太慢了，所以使用Rust + Tensorflow 加载训练好的模型就会是一个很好的选择。</p>
+<h2 id="tensorflowmo-xing">Tensorflow模型</h2>
+<p>参照<a href="https://github.com/tensorflow/rust">tensorflow-rust</a>的例子<a href="https://github.com/tensorflow/rust/blob/master/examples/addition.rs">addition</a>加载已经导出的tensorflow模型是相当简单的一件事情：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-Rust" data-lang="Rust"><span style="color:#608b4e;">// Load the computation graph defined by addition.py.
+</span><span style="color:#569cd6;">let mut</span><span style="color:#dcdcdc;"> graph = Graph::new();
+</span><span style="color:#569cd6;">let mut</span><span style="color:#dcdcdc;"> proto = Vec::new();
+File::open(filename)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">.read_to_end(</span><span style="color:#569cd6;">&amp;mut</span><span style="color:#dcdcdc;"> proto)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+graph.import_graph_def(</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">proto, </span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">ImportGraphDefOptions::new())</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+</span></code></pre>
+<p>可以看到从上面的代码中，我们已经导入Tensorflow的模型为一个图（Graph）。操作方法就是将模型读到缓存里面，然后利用Tensorflow的方法<code>import_graph_def</code>直接导入该模型。这个图里面有很多的节点，也被称做是操作（Operation）,包含我们对输入输出的种种操作，Tensorflow 支持的种种操作我们可以从<a href="https://github.com/tensorflow/tensorflow/blob/master/tensorflow/core/ops/ops.pbtxt">这里</a>找到，这些操作都是通过名字（name）和图（graph）关联起来的。目前我们是从别的语言训练好导出的模型中导入的这张图，也就是说这张图里本身就已经含有了种种Operation。如果我们需要输入内容进行预测，首先就需要知道输入和输出操作的名称，然后通过名称获取对应的操作，再进行输入，获取输出。</p>
+<p>我们可以通过如下的方式获取未知模型的输入操作和输出操作的名称：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-Rust" data-lang="Rust"><span style="color:#569cd6;">fn </span><span style="color:#dcdcdc;">main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
+    </span><span style="color:#569cd6;">let mut</span><span style="color:#dcdcdc;"> file = File::open(</span><span style="color:#d69d85;">&quot;./detect.pb&quot;</span><span style="color:#dcdcdc;">)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let mut</span><span style="color:#dcdcdc;"> buffer = Vec::new();
+    file.read_to_end(</span><span style="color:#569cd6;">&amp;mut</span><span style="color:#dcdcdc;"> buffer)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let mut</span><span style="color:#dcdcdc;"> graph = Graph::new();
+    graph.import_graph_def(</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">buffer, </span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">ImportGraphDefOptions::new())</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> operation_iter = graph.operation_iter();
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> names: Vec&lt;String&gt; = operation_iter.map(|op| {
+        op.name().unwrap()
+    }).collect();
+    println!(</span><span style="color:#d69d85;">&quot;names: </span><span style="color:#b4cea8;">{:?}</span><span style="color:#d69d85;">&quot;</span><span style="color:#dcdcdc;">, names);
+    Ok(())
+}
+</span></code></pre>
+<p>这是打印了所有的<code>Opearation</code>的名称。</p>
+<p>知道了名称之后，我们就可以导入数据进行预测了。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-Rust" data-lang="Rust"><span style="color:#569cd6;">use </span><span style="color:#dcdcdc;">tensorflow::{ SessionRunArgs, SessionOptions, Session, Tensor, Graph, ImportGraphDefOptions };
+</span><span style="color:#569cd6;">use </span><span style="color:#dcdcdc;">image::GenericImageView;
+
+</span><span style="color:#569cd6;">use </span><span style="color:#dcdcdc;">std::fs::File;
+</span><span style="color:#569cd6;">use </span><span style="color:#dcdcdc;">std::io::prelude::*;
+</span><span style="color:#569cd6;">use </span><span style="color:#dcdcdc;">std::error::Error;
+
+</span><span style="color:#569cd6;">const </span><span style="color:#b4cea8;">INPUT_NAME</span><span style="color:#dcdcdc;">: </span><span style="color:#569cd6;">&amp;&#39;static str </span><span style="color:#dcdcdc;">= </span><span style="color:#d69d85;">&quot;image_tensor&quot;</span><span style="color:#dcdcdc;">;
+</span><span style="color:#569cd6;">const </span><span style="color:#b4cea8;">OUT_DETECT_BOX</span><span style="color:#dcdcdc;">: </span><span style="color:#569cd6;">&amp;&#39;static str </span><span style="color:#dcdcdc;">= </span><span style="color:#d69d85;">&quot;detection_boxes&quot;</span><span style="color:#dcdcdc;">;
+</span><span style="color:#569cd6;">const </span><span style="color:#b4cea8;">OUT_DETECT_SCORES</span><span style="color:#dcdcdc;">: </span><span style="color:#569cd6;">&amp;&#39;static str </span><span style="color:#dcdcdc;">= </span><span style="color:#d69d85;">&quot;detection_scores&quot;</span><span style="color:#dcdcdc;">;
+
+</span><span style="color:#569cd6;">fn </span><span style="color:#dcdcdc;">main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
+    </span><span style="color:#569cd6;">let mut</span><span style="color:#dcdcdc;"> file = File::open(</span><span style="color:#d69d85;">&quot;./detect.pb&quot;</span><span style="color:#dcdcdc;">)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let mut</span><span style="color:#dcdcdc;"> buffer = Vec::new();
+    file.read_to_end(</span><span style="color:#569cd6;">&amp;mut</span><span style="color:#dcdcdc;"> buffer)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let mut</span><span style="color:#dcdcdc;"> graph = Graph::new();
+    graph.import_graph_def(</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">buffer, </span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">ImportGraphDefOptions::new())</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> img = image::open(</span><span style="color:#d69d85;">&quot;test.jpg&quot;</span><span style="color:#dcdcdc;">)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let </span><span style="color:#dcdcdc;">(width, height) = img.dimensions();
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> img_data = </span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">img.to_rgb().to_vec();
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> img_tensor = Tensor::new(</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">[</span><span style="color:#b5cea8;">1</span><span style="color:#dcdcdc;">, height </span><span style="color:#569cd6;">as u64</span><span style="color:#dcdcdc;">, width </span><span style="color:#569cd6;">as u64</span><span style="color:#dcdcdc;">, </span><span style="color:#b5cea8;">3</span><span style="color:#dcdcdc;">]);
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> img_tensor = img_tensor.with_values(</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">img_data)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> session = Session::new(</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">SessionOptions::new(), </span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">graph)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let mut</span><span style="color:#dcdcdc;"> args = SessionRunArgs::new();
+    args.add_feed(</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">graph.operation_by_name_required(</span><span style="color:#b4cea8;">INPUT_NAME</span><span style="color:#dcdcdc;">)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">, </span><span style="color:#b5cea8;">0</span><span style="color:#dcdcdc;">, </span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">img_tensor);
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> box_token = args.request_fetch(</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">graph.operation_by_name_required(</span><span style="color:#b4cea8;">OUT_DETECT_BOX</span><span style="color:#dcdcdc;">)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">, </span><span style="color:#b5cea8;">0</span><span style="color:#dcdcdc;">);
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> scores_token = args.request_fetch(</span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">graph.operation_by_name_required(</span><span style="color:#b4cea8;">OUT_DETECT_SCORES</span><span style="color:#dcdcdc;">)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">, </span><span style="color:#b5cea8;">0</span><span style="color:#dcdcdc;">);
+    session.run(</span><span style="color:#569cd6;">&amp;mut</span><span style="color:#dcdcdc;"> args)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> boxes: Tensor&lt;</span><span style="color:#569cd6;">f32</span><span style="color:#dcdcdc;">&gt; = args.fetch(box_token)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">let</span><span style="color:#dcdcdc;"> scores: Tensor&lt;</span><span style="color:#569cd6;">f32</span><span style="color:#dcdcdc;">&gt; = args.fetch(scores_token)</span><span style="color:#569cd6;">?</span><span style="color:#dcdcdc;">;
+
+    println!(</span><span style="color:#d69d85;">&quot;boxes: </span><span style="color:#b4cea8;">{}</span><span style="color:#e3bbab;">\n</span><span style="color:#d69d85;">scores: </span><span style="color:#b4cea8;">{}</span><span style="color:#d69d85;">&quot;</span><span style="color:#dcdcdc;">, boxes, scores);
+
+    Ok(())
+}
+</span></code></pre>
+<p>上面的例子中，可以看到我们配置了三个操作名称：&quot;image_tensor&quot;、 &quot;detection_boxes&quot;、 &quot;detection_scores&quot;，这三个是典型的<a href="https://github.com/tensorflow/models/tree/master/research/object_detection">Object Detection</a>的<code>Opearation</code>名称，第一个是输入操作的名称，后两个是输出操作的名称。而且我们输入的是一个图片数据。得到输出之后，可以进一步对输出数据做处理</p>
+<h2 id="keras-mo-xing">Keras 模型</h2>
+<p>使用Tensorflow 加载tensorflow的模型自然而然是没有什么问题的，但是现阶段用Keras和Tensorflow作为后端进行训练会是多数人的选择，这样训练得到的模型，我们又怎么导入然后进行预测呢？Rust + Kearas？不不不，Keras只是python实现的，我们不能用Rust调用python。但是我们可以将Keras模型加载出来然后再导出为Tensorflow模型，这样就是皆大欢喜了。</p>
+<p>使用Tensorflow作为后端的Keras用的是全局<code>Session</code>，我们只需要拿到对应的图保存对应的model并不难。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-python" data-lang="python"><span style="color:#569cd6;">def </span><span style="color:#dcdcdc;">freeze_session(session, keep_var_names=</span><span style="color:#569cd6;">None</span><span style="color:#dcdcdc;">, output_name=</span><span style="color:#569cd6;">None</span><span style="color:#dcdcdc;">, clear_devices=</span><span style="color:#569cd6;">True</span><span style="color:#dcdcdc;">):
+    graph = session.graph
+    </span><span style="color:#569cd6;">with </span><span style="color:#dcdcdc;">graph.as_default():
+        freeze_var_names = list(set(v.op.name </span><span style="color:#569cd6;">for </span><span style="color:#dcdcdc;">v </span><span style="color:#569cd6;">in </span><span style="color:#dcdcdc;">tf.global_variables()).difference(keep_var_names </span><span style="color:#569cd6;">or </span><span style="color:#dcdcdc;">[]))
+        output_names = output_name </span><span style="color:#569cd6;">or </span><span style="color:#dcdcdc;">[]
+        output_names += [v.op.name </span><span style="color:#569cd6;">for </span><span style="color:#dcdcdc;">v </span><span style="color:#569cd6;">in  </span><span style="color:#dcdcdc;">tf.global_variables()]
+        input_graph_def = graph.as_graph_def()
+        </span><span style="color:#569cd6;">if </span><span style="color:#dcdcdc;">clear_devices:
+            </span><span style="color:#569cd6;">for </span><span style="color:#dcdcdc;">node </span><span style="color:#569cd6;">in </span><span style="color:#dcdcdc;">input_graph_def.node:
+                node.device = </span><span style="color:#d69d85;">&quot;&quot;
+            </span><span style="color:#dcdcdc;">frozen_graph = convert_variables_to_constants(session, input_graph_def, output_names, freeze_var_names)
+            </span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">frozen_graph
+</span></code></pre>
+<p>你可以在 <a href="https://github.com/kingrongH/convert_keras_to_tensorflow">convert_keras_to_tensorflow</a> 找到一个详细的例子</p>
+<p>我们加载转换好的tensorflow模型，就可以搞一些事情了。</p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date"> 1 May 2020</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/rust/">Rust</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/rust/">#rust</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/tensorflow/">#tensorflow</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

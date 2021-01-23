@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>nvim:Error while reading ShaDa file there is an item at position 270498 that must not be there Missing itemsare for internal uses only</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/vimfilewen-ti/#wen-ti-miao-shu">问题描述</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/vimfilewen-ti/#jie-jue-wen-ti">解决问题</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>nvim:Error while reading ShaDa file there is an item at position 270498 that must not be there Missing itemsare for internal uses only</h1>
+    </header>
+    <div class="content">
+        <h1 id="wen-ti-miao-shu">问题描述</h1>
+<p>今天打开<code>SpaceVim</code> 的时候提示错误：</p>
+<pre style="background-color:#1e1e1e;">
+<code>Error while reading ShaDa file: there is an item at position 270498 that must not be there: Missing itemsare for internal uses only
+</code></pre>
+<p>并且发现只要一旦打开了vimfile这个插件问题就开始提示。继续按下 <code>Enter</code> 会开始提示vim配置上具体哪一行的错误。</p>
+<h1 id="jie-jue-wen-ti">解决问题</h1>
+<p><code>nvim</code> github上有相似的问题: <a href="https://github.com/neovim/neovim/issues/6875" title="vimfile错误">#6875</a> ，实际上配置上并没有什么错误。</p>
+<p>按照git上所说我们在终端运行 <code>nvim -u NONE -V</code>得到输出信息：</p>
+<pre style="background-color:#1e1e1e;">
+<code>$ nvim -u NONE -V
+Reading ShaDa file &quot;/Users/kevin/.local/share/nvim/shada/main.shada&quot; info marks oldfiles
+E576: Error while reading ShaDa file: there is an item at position 270498 that must not be there: Missing items are for internal uses only
+Press ENTER or type command to continue
+</code></pre>
+<p>我们得到的输出信息也许不同不过我们只要移除 <code>.local/nvim/shada/main.shada</code> ，完美工作。</p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date"> 4 September 2018</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/problems/">Problems</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/vim/">#vim</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/spacevim/">#SpaceVim</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/vimfile/">#vimfile</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

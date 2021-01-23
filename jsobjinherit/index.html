@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>JavaScript原型继承的方式探讨</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/jsobjinherit/#guan-yu">关于</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/jsobjinherit/#yuan-xing-ji-cheng-fang-shi">原型继承方式</a>
+                 <ul>
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/jsobjinherit/#ji-yu-object-create-fang-shi">基于Object.create()方式</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/jsobjinherit/#shi-yong-newguan-jian-zi">使用new关键字</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/jsobjinherit/#shi-yong-qiao-jie-han-shu">使用桥接函数</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/jsobjinherit/#classji-cheng">Class继承</a>
+                        </li>
+                        
+                    
+                </ul> 
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/jsobjinherit/#jie-wei">结尾</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>JavaScript原型继承的方式探讨</h1>
+    </header>
+    <div class="content">
+        <h2 id="guan-yu">关于</h2>
+<p>基于类和子类的继承方式是我们在别的语言如<code>python</code>、<code>Java</code>和<code>C++</code>中接触到最多的一种模式，这种模式无论是对于创建子类还是创建对象来说都是十分方便的。<code>JavaScript</code>算是一个特例吧，它的基于原型链的方式很容易将人们搞的迷糊，对于很多接触过<code>class</code>继承方法的人来说都是很难接受的一个事情，其中就包括我，我也是花了较长的一个时间才接受摸清这个事情。</p>
+<p>虽然说基于原型链来实现面向对象编程的<code>JavaScript</code>在代码上有一些混乱，但是如果我们认真琢磨还是不难发现其中的有迹可循的真相。以下是我对<code>JavaScript</code>原型继承的方式的一个终结，适合已经了解了一些<code>JavaScript</code>面向对象编程的童鞋阅读，如果有错误欢迎指正。</p>
+<h2 id="yuan-xing-ji-cheng-fang-shi">原型继承方式</h2>
+<p><code>JavaScript</code>的标准一直在更新，新的标准出来也不是所有的厂商和浏览器都能够跟上，所以这就造成了一部分混乱，JS面向对象课程的内容有老的有新的，但没有全的。这也是我在学习中遇到的困境。对于<code>JavaScript</code>原型继承的方式，我个人总结主要有以下集中。</p>
+<ul>
+<li>基于<code>Object.create()</code>方式</li>
+<li>使用<code>new</code>关键字</li>
+<li>使用桥接函数</li>
+<li><code>class</code>关键字</li>
+</ul>
+<h3 id="ji-yu-object-create-fang-shi">基于<code>Object.create()</code>方式</h3>
+<p>这个方法是<code>ES6</code>标准新出的，所以使用的时候需要注意支持与否的问题。</p>
+<p>假设我们有一个<code>Student</code>对象，有一个<code>name</code>属性，有一个<code>hello</code>方法：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">Student(props){
+	this.name = props.name </span><span style="color:#569cd6;">|| </span><span style="color:#d69d85;">&quot;Unamed&quot;</span><span style="color:#dcdcdc;">;
+} 
+Student.</span><span style="color:#b5cea8;">prototype</span><span style="color:#dcdcdc;">.hello = </span><span style="color:#569cd6;">function</span><span style="color:#dcdcdc;">(){
+	alert(</span><span style="color:#d69d85;">&quot;Hello &quot; </span><span style="color:#dcdcdc;">+ this.name + </span><span style="color:#d69d85;">&quot;!&quot;</span><span style="color:#dcdcdc;">);
+}
+</span></code></pre>
+<p>我们想要创建一个新的对象小学生<code>PrimaryStudent</code>继承自<code>Student</code>，使用<code>Object.create()</code>方法我们需要这么做</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">PrimaryStudent(props){
+	Student.call(this,props);
+}
+PrimaryStudent.</span><span style="color:#b5cea8;">prototype </span><span style="color:#dcdcdc;">= Object.create(Student.</span><span style="color:#b5cea8;">prototype</span><span style="color:#dcdcdc;">);
+PrimaryStudent.</span><span style="color:#b5cea8;">prototype</span><span style="color:#dcdcdc;">.constructor = PrimaryStudent;  </span><span style="color:#608b4e;">//因为我们重写了PrimaryStudent的原型所以我们需要重新改回它的构造函数
+</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">xiaohua = </span><span style="color:#569cd6;">new </span><span style="color:#dcdcdc;">PrimaryStudent({name:</span><span style="color:#d69d85;">&quot;xiaohua&quot;</span><span style="color:#dcdcdc;">});
+</span></code></pre>
+<p>这个时候我们看看<code>xiaohua</code>的原型链是不是符合我们的要求</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#dcdcdc;">xiaohua ---</span><span style="color:#569cd6;">&gt; </span><span style="color:#dcdcdc;">PrimaryStudent.</span><span style="color:#b5cea8;">prototype </span><span style="color:#dcdcdc;">---</span><span style="color:#569cd6;">&gt; </span><span style="color:#dcdcdc;">Student.</span><span style="color:#b5cea8;">prototype </span><span style="color:#dcdcdc;">---</span><span style="color:#569cd6;">&gt;</span><span style="color:#dcdcdc;">Object.</span><span style="color:#b5cea8;">prototype </span><span style="color:#dcdcdc;">---</span><span style="color:#569cd6;">&gt; null
+</span></code></pre>
+<p>从这个原型链我们就可以看出<code>PrimaryStudent</code>确实是继承自<code>Student</code>的。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#dcdcdc;">xiaohua.name; </span><span style="color:#608b4e;">//”xiaohua“
+</span><span style="color:#dcdcdc;">xiaohua.hello(); </span><span style="color:#608b4e;">//”Hello xiaohua!“
+</span></code></pre><h3 id="shi-yong-newguan-jian-zi">使用<code>new</code>关键字</h3>
+<p>准确说这种方法和上面的方法本质上是一模一样的，区别在在于我们把<code>PrimaryStudent.prototype = Object.create(Student.prototype);</code>这一行替换为了<code>PrimaryStudent.prototype = new Student({})</code>，其他的代码是一样的。</p>
+<p>这两种方法在原型链上都是一样的，调用起来也可以达到一样的效果。</p>
+<p>但是我们注意到一个问题，使用这种方式的时候我们不得不在<code>Student()</code>中加上参数，因为这是该构造函数所必须要求的，这种导致一个问题，我们的<code>PrimaryStudent.prototype</code>的属性中多了一个<code>name</code>，冗杂的属性，这并不是我们所需要的。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#dcdcdc;">PrimaryStudent.</span><span style="color:#b5cea8;">prototype</span><span style="color:#dcdcdc;">.hasOwnProperty(</span><span style="color:#d69d85;">&quot;name&quot;</span><span style="color:#dcdcdc;">); </span><span style="color:#608b4e;">//true
+</span></code></pre>
+<p>我们可以使用接下来的方法来修复。</p>
+<h3 id="shi-yong-qiao-jie-han-shu">使用桥接函数</h3>
+<p>使用桥接函数的方法来自<code>JSON</code>的发明者道格拉斯，我觉得这个方法是上一个方法的改进，桥接函数的核心是空函数<code>F()</code>，创建一个空函数<code>F</code>之后，令<code>F.prototype = Student.prototype</code>，然后再从<code>F</code>上创建新对象并赋值给<code>PrimaryStudent.prototype</code>，最后再对<code>PrimaryStudent</code>的构造函数进行修正。据此我们得到的<code>PrimaryStudent</code>确实是继承自<code>Student</code>的，并且没有属性上的冗余。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">Student(props) {
+	this.name = props.name </span><span style="color:#569cd6;">|| </span><span style="color:#d69d85;">&#39;Unnamed&#39;</span><span style="color:#dcdcdc;">;
+}
+
+Student.</span><span style="color:#b5cea8;">prototype</span><span style="color:#dcdcdc;">.hello = </span><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">() {
+ 	alert(</span><span style="color:#d69d85;">&#39;Hello, &#39; </span><span style="color:#dcdcdc;">+ this.name + </span><span style="color:#d69d85;">&#39;!&#39;</span><span style="color:#dcdcdc;">);
+ }
+</span><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">PrimaryStudent(props){
+    Student.call(this,props);
+}
+</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">F = </span><span style="color:#569cd6;">function</span><span style="color:#dcdcdc;">(){};
+F.</span><span style="color:#b5cea8;">prototype </span><span style="color:#dcdcdc;">= Student.</span><span style="color:#b5cea8;">prototype</span><span style="color:#dcdcdc;">;
+PrimaryStudent.</span><span style="color:#b5cea8;">prototype </span><span style="color:#dcdcdc;">= </span><span style="color:#569cd6;">new </span><span style="color:#dcdcdc;">F();
+PrimaryStudent.</span><span style="color:#b5cea8;">prototype</span><span style="color:#dcdcdc;">.constructor = PrimaryStudent;
+
+</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">xiaohua = </span><span style="color:#569cd6;">new </span><span style="color:#dcdcdc;">PrimaryStudent({name:</span><span style="color:#d69d85;">&quot;xiaohua&quot;</span><span style="color:#dcdcdc;">});
+</span></code></pre>
+<p>道格拉斯这个方法可以说是很机智了，我们且来看看<code>xiaohua</code>的原型链：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#dcdcdc;">xiaohua ---</span><span style="color:#569cd6;">&gt; </span><span style="color:#dcdcdc;">PrimaryStudent.</span><span style="color:#b5cea8;">prototype </span><span style="color:#dcdcdc;">---</span><span style="color:#569cd6;">&gt; </span><span style="color:#dcdcdc;">Student.</span><span style="color:#b5cea8;">prototype </span><span style="color:#dcdcdc;">---</span><span style="color:#569cd6;">&gt; </span><span style="color:#dcdcdc;">Object.</span><span style="color:#b5cea8;">prototype </span><span style="color:#dcdcdc;">---</span><span style="color:#569cd6;">&gt; null
+</span></code></pre>
+<p>符合我们的要求并且<code>PrimaryStudent</code>中没有冗余的属性。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#dcdcdc;">PrimaryStudent.</span><span style="color:#b5cea8;">prototype</span><span style="color:#dcdcdc;">.hasOwnProperty(</span><span style="color:#d69d85;">&quot;name&quot;</span><span style="color:#dcdcdc;">);  </span><span style="color:#608b4e;">//false
+</span></code></pre>
+<p>我们发现这个继承的方法可以复用，所以我们可以写以用于继承的函数，专门用来连接“子”与“父”，在此我们却不来实现了，可以在参考链接找一找哦</p>
+<h3 id="classji-cheng">Class继承</h3>
+<p>这种方式可谓是最贴近真实，子类与父类是我们在学习其他语言经常就能接触到的，使用这种方式完成继承的关系，是我们更容易接受的一件事情。但是<code>JavaScript</code>并没有实现真正的<code>Class</code>的概念，现实仍然是<code>Class</code>包装下的原型链，所以我们还是有必要学习Class出现之前的继承方式，更有利于我们理解<code>JavaScript</code>原型链的概念。</p>
+<p><code>Class</code>关键字是ES6标准新定义的，所以我们在使用的时候也还是要考虑到兼容性问题。</p>
+<p>使用<code>Class</code>定义一个<code>Student</code>：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#dcdcdc;">Class Student(){
+	constructor(props){
+		this.name = props.name;
+	}
+	hello() {
+		alert(</span><span style="color:#d69d85;">&quot;Hello &quot;</span><span style="color:#dcdcdc;">+ this.name + </span><span style="color:#d69d85;">&quot;!&quot;</span><span style="color:#dcdcdc;">);
+	}
+}
+</span></code></pre>
+<p>使用<code>Class</code>定义一个<code>PrimaryStudent</code>继承自<code>Student</code>：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#dcdcdc;">Class PrimaryStudent extends Student(){
+	constructor(props){
+		super(props);
+	}
+} 
+</span></code></pre>
+<p><code>Class</code>的方法简直不能太好用！！！</p>
+<h2 id="jie-wei">结尾</h2>
+<p>以上便是我个人在学习过程中总结出来的一些JavaScript的继承的方式，希望能够帮到你，更希望你能够在评论区提出一些意见，感谢观看！</p>
+<p><strong>参考链接：</strong></p>
+<ul>
+<li><a href="https://www.liaoxuefeng.com/wiki/001434446689867b27157e896e74d51a89c25cc8b43bdb3000/0014344997013405abfb7f0e1904a04ba6898a384b1e925000">廖雪峰的JavaScript教程</a></li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/create">Object.create()用法</a></li>
+</ul>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date">18 February 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/javascript/">JavaScript</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/javascript/">#JavaScript</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

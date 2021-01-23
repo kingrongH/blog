@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>网址中的中文编码和解码方法</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/urldecodechinese/#yuan-li">原理</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/urldecodechinese/#jie-ma-fang-fa">解码方法</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>网址中的中文编码和解码方法</h1>
+    </header>
+    <div class="content">
+        <p>当我们在chrome的地址栏上输入中文的进行搜索之后，我们敲入的关键词在这个时候被编码成了我们看不懂的一串由<code>%</code>和十六进制数组成的东西。</p>
+<p>比如:</p>
+<p><code>中文搜索</code></p>
+<p>被编码成了</p>
+<p><code>%E4%B8%AD%E6%96%87%E6%90%9C%E7%B4%A2</code></p>
+<p>所以如何它是如何编码和解码中文的呢？</p>
+<span id="continue-reading"></span><h2 id="yuan-li">原理</h2>
+<p>根据阮一峰老师的博客<a href="http://www.ruanyifeng.com/blog/2010/02/url_encoding.html">关于URL编码</a>，我们得知了以下结论:</p>
+<ul>
+<li>网址路径采用的是UTF-8编码</li>
+<li>查询字符串的编码用的是操作系统默认的编码</li>
+<li><code>GET/POST</code>用的是网页的编码（GB2312或者UTF-8）
+<ul>
+<li><code>&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html;charset=xxxx&quot;&gt;</code>xxxx是啥就进行什么编码</li>
+</ul>
+</li>
+<li>在AJAX请求中，IE采用的是系统编码(GB2312)，Firefox 总是采用UTF-8</li>
+</ul>
+<p>所有以上的这些结论都是在将中文字符转化为各自的编码集之后在每个字节前加上<code>%</code>得到的结果。</p>
+<p>比如：<code>中文</code>使用utf-8编码得到<code>e4b8ade69687</code>，其中<code>中</code>对应<code>e4b8ad</code>，<code>文</code>对应<code>e69687</code>。在一个字节前加上<code>%</code>就得到了<code>%e4%b8%ad%e6%96%87</code>。</p>
+<p>至于utf-8具体是如何编码的，请参见：<a href="http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html">阮一峰-字符编码笔记：ASCII，Unicode 和 UTF-8</a>。</p>
+<h2 id="jie-ma-fang-fa">解码方法</h2>
+<p>了解了网址中中问编码的原理，我决定尝试一下使用nodejs实现一个网址解码的函数：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">urlDecode(str,charset){
+	</span><span style="color:#569cd6;">let </span><span style="color:#dcdcdc;">bytes = [];
+	</span><span style="color:#569cd6;">for</span><span style="color:#dcdcdc;">(</span><span style="color:#569cd6;">let </span><span style="color:#dcdcdc;">i=</span><span style="color:#b5cea8;">0</span><span style="color:#dcdcdc;">; i</span><span style="color:#569cd6;">&lt;</span><span style="color:#dcdcdc;">str.length;i++){
+		</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(str[i]===</span><span style="color:#d69d85;">&quot;%&quot;</span><span style="color:#dcdcdc;">){
+			bytes.push(parseInt(str.substring(i+</span><span style="color:#b5cea8;">1</span><span style="color:#dcdcdc;">,i+</span><span style="color:#b5cea8;">3</span><span style="color:#dcdcdc;">),</span><span style="color:#b5cea8;">16</span><span style="color:#dcdcdc;">));
+			i = i+</span><span style="color:#b5cea8;">2</span><span style="color:#dcdcdc;">;
+		}</span><span style="color:#569cd6;">else</span><span style="color:#dcdcdc;">{
+			bytes.push(str.charCodeAt(i));
+		}
+	}
+	</span><span style="color:#569cd6;">let </span><span style="color:#dcdcdc;">buf = Buffer.from(bytes);
+	</span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">buf.toString(charset);
+}
+</span></code></pre>
+<p>想法自然就是将所有的字节都分离出来，添加为一个数组，将这个数组转为nodejs的二进制数据流Buffer，然后再转为utf-8。
+这个方式只能解码utf-8的字符了，如果是使用GB2312 编码参见：<a href="https://www.npmjs.com/package/iconv-lite">iconv-lite</a>。</p>
+<p>以下是该库所支持的编码方式，不仅可用于解码还可以用于编码。</p>
+<blockquote>
+<p>All node.js native encodings: utf8, ucs2 / utf16-le, ascii, binary, base64, hex.
+Additional unicode encodings: utf16, utf16-be, utf-7, utf-7-imap.
+All widespread singlebyte encodings: Windows 125x family, ISO-8859 family, IBM/DOS codepages, Macintosh family, KOI8 family, all others supported by iconv library. Aliases like 'latin1', 'us-ascii' also supporte
+All widespread multibyte encodings: CP932, CP936, CP949, CP950, GB2312, GBK, GB18030, Big5, Shift_JIS, EUC-JP.</p>
+</blockquote>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date">30 April 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/javascript/">JavaScript</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/url/">#url</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/node/">#node</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

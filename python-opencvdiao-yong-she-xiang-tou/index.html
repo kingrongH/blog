@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>python-opencv调用摄像头</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/python-opencvdiao-yong-she-xiang-tou/#guan-yu">关于</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/python-opencvdiao-yong-she-xiang-tou/#shi-xian">实现</a>
+                 <ul>
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/python-opencvdiao-yong-she-xiang-tou/#yong-dao-de-ku">用到的库</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/python-opencvdiao-yong-she-xiang-tou/#diao-yong-she-xiang-tou">调用摄像头</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/python-opencvdiao-yong-she-xiang-tou/#du-qu-bing-bo-fang">读取并播放</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/python-opencvdiao-yong-she-xiang-tou/#shi-fang-she-xiang-tou">释放摄像头</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/python-opencvdiao-yong-she-xiang-tou/#wan-zheng-dai-ma">完整代码</a>
+                        </li>
+                        
+                    
+                </ul> 
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/python-opencvdiao-yong-she-xiang-tou/#qi-ta-cao-zuo">其他操作</a>
+                 <ul>
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/python-opencvdiao-yong-she-xiang-tou/#bao-cun-shi-pin-huo-zhe-jie-tu">保存视频或者截图</a>
+                        </li>
+                        
+                    
+                </ul> 
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/python-opencvdiao-yong-she-xiang-tou/#xiang-guan-lai-yuan">相关来源</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>python-opencv调用摄像头</h1>
+    </header>
+    <div class="content">
+        <h1 id="guan-yu">关于</h1>
+<p>Python利用opencv的库实现对摄像头的数据的读取，并逐帧显示。</p>
+<p>opencv的安装： 终端运行 <code>pip install python-opencv</code> 即可。</p>
+<h1 id="shi-xian">实现</h1>
+<h2 id="yong-dao-de-ku">用到的库</h2>
+<pre style="background-color:#1e1e1e;">
+<code>import cv2
+import numpy as np #如果你需要对读取到的摄像数据进行进一步的应用。
+</code></pre><h2 id="diao-yong-she-xiang-tou">调用摄像头</h2>
+<p>调用摄像头，<code>VideoCapture()</code> 内的数字表示的是摄像头的设备编号，笔记本内建摄像头的编号一般为 <code>0</code>，如果你想使用外置摄像头将数字改为 <code>1</code>等，随你的摄像头的设备编号决定，可以通过设备管理器查看并尝试。</p>
+<pre style="background-color:#1e1e1e;">
+<code>cap = cv2.VideoCapture(0)
+</code></pre><h2 id="du-qu-bing-bo-fang">读取并播放</h2>
+<p>在 <code>while</code> 循环中利用 <code>cap.read()</code> 读取摄像头的某一帧，通过 <code>imshow()</code> 来展示这一帧。等待1个单位时间后，如果检测到 <code>q</code> 按键被按下，就跳出循环，即停止读取和展示。</p>
+<p>其中 <code>ret</code> 变量是<code>cap</code>读取之后返回的一个<code>bool</code> 变量，可以用它来判断是否读取到数据。</p>
+<pre style="background-color:#1e1e1e;">
+<code>while(True):
+  ret,frame = cap.read(0) #读取数据
+  cv2.imshow('Frame',frame) #展示结果
+  
+  if cv2.waitkey(1) &amp; 0xFF == ord('q'):
+    break
+</code></pre><h2 id="shi-fang-she-xiang-tou">释放摄像头</h2>
+<p>在调用摄像头之后不要忘记释放摄像头，否则你的下次调用摄像头的时候可能会有被占用的报错。我们需要释放摄像头并关闭我们用来展示的窗口。</p>
+<pre style="background-color:#1e1e1e;">
+<code>cap.release()
+cv2.destoryAllWindows()
+</code></pre><h2 id="wan-zheng-dai-ma">完整代码</h2>
+<p>附上上述操作的完整代码：</p>
+<pre style="background-color:#1e1e1e;">
+<code>import numpy as np  
+import cv2
+
+cap = cv2.VideoCapture(0)
+
+while(True):
+    ret, frame = cap.read()
+
+    cv2.imshow('Frame',frame)
+    if cv2.waitKey(1) &amp; 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+</code></pre><h1 id="qi-ta-cao-zuo">其他操作</h1>
+<h2 id="bao-cun-shi-pin-huo-zhe-jie-tu">保存视频或者截图</h2>
+<p>如果我们想要保存其中的某一帧，即截图，使用 <code>cv2.imwrite()</code> 可以非常方便的完成该功能，<code>imwrite</code>的使用方法，戳 <a href="https://docs.opencv.org/3.0-beta/modules/imgcodecs/doc/reading_and_writing_images.html?highlight=imwrite#cv2.imwrite" title="imwrite">这里</a></p>
+<p>对于保存视频需要稍微复杂一些些的操作，我们需要创建一个 <code>VideoWrite</code>对象，并指定保存的文件名，然后指定<code>Fourcc</code> 值(下节详细)。然后指定每秒的帧数(fps)和帧的大小。该对象的最后一个参数为<code>isColor</code>，如果为<code>True</code>则编码器需要彩色帧，默认为 <code>False</code>,即保存为灰度帧。</p>
+<p><strong>Fourcc</strong>是用于指定__视频编码器__的四字节代码，在 <a href="http://www.fourcc.org/codecs.php">fourcc.org</a> 中可以找到可用的编码器列表（值得注意的是对于不同的系统适用的编码器似乎还不同） 。在这里我们使用 <code>cv2.VideoWriter_fourcc()</code> 对象来指定，比如使用 <code>cv2.VideoWriter_fourcc(* 'XVID')</code> 来指定<code>XVID</code>编码器。</p>
+<p>代码如下：</p>
+<pre style="background-color:#1e1e1e;">
+<code>import numpy as np
+import cv2
+
+cap = cv2.VideoCapture(0)
+
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out = cv2.VideoWriter('output.avi',fourcc, 20.0, (640,480))
+
+while(cap.isOpened()):
+    ret, frame = cap.read()
+    if ret==True:
+        frame = cv2.flip(frame,0)
+
+        out.write(frame)
+
+        cv2.imshow('frame',frame)
+        if cv2.waitKey(1) &amp; 0xFF == ord('q'):
+            break
+    else:
+        break
+
+cap.release()
+out.release()
+cv2.destroyAllWindows()
+</code></pre><h1 id="xiang-guan-lai-yuan">相关来源</h1>
+<p><a href="https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_gui/py_video_display/py_video_display.html" title="Opencv">Opencv</a></p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date">12 September 2018</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/learn/">Learn</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/python/">#python</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/opencv/">#opencv</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

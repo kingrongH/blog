@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>SpaceVim自动折行与自动换行</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/spacevimzi-dong-zhe-xing-yu-zi-dong-huan-xing/#guan-yu">关于</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/spacevimzi-dong-zhe-xing-yu-zi-dong-huan-xing/#zi-dong-huan-xing-yu-zi-dong-zhe-xing-de-qu-bie">自动换行与自动折行的区别</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/spacevimzi-dong-zhe-xing-yu-zi-dong-huan-xing/#jie-jue-fang-fa">解决方法</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/spacevimzi-dong-zhe-xing-yu-zi-dong-huan-xing/#bu-zu">不足</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>SpaceVim自动折行与自动换行</h1>
+    </header>
+    <div class="content">
+        <h2 id="guan-yu">关于</h2>
+<p>使用SpaceVim写Markdown总是一段一行写到头，让人很生气。而作为半吊子vim使用者脑子里完全没有关键词，不知道如何去搜索解决这个问题，于是搜了半天的自动换行，完全不得要领。在经过大量的查找之后终于让我找到了，自动换行与自动折行的区别。原来我想要达到的目的叫做自动折行。于是乎记录一下今天的愚蠢。。。</p>
+<h2 id="zi-dong-huan-xing-yu-zi-dong-zhe-xing-de-qu-bie">自动换行与自动折行的区别</h2>
+<ul>
+<li>
+<p>自动换行是当你写满多少字数之后会自动加一个回车，然后从下一行开始。</p>
+</li>
+<li>
+<p>自动折行是当你写满窗口的一行之后自动从下一行开始，没有加回车，并且是同属一行的，如图：</p>
+</li>
+</ul>
+<p><img src="https://i.loli.net/2018/08/17/5b76bfda92156.png" alt="自动折行" title="自动折行" /></p>
+<p>vim里面设置自动换行是在配置文件中设置<code>set textwidth = 80</code> </p>
+<p>设置自动折行则是<code>set wrap</code> ，取消自动折行<code>set nowrap</code> </p>
+<h2 id="jie-jue-fang-fa">解决方法</h2>
+<p>需要SpaceVim在编辑markdown文件时自动折行，步骤如下：</p>
+<p>1.在 <code>~/.SpaceVim.d/init.toml</code>  [options] 下添加：</p>
+<pre style="background-color:#1e1e1e;">
+<code>bootstrap_before = &quot;myspacevim#before&quot;
+</code></pre>
+<p>2.然后新建:</p>
+<p><code>~/.SpaceVim.d/autoload/myspacevim.vim</code></p>
+<p>将下面这行添加到其中即可</p>
+<pre style="background-color:#1e1e1e;">
+<code>au BufNewFile,BufFilePre,BufRead *.md set filetype=markdown wrap
+</code></pre><h2 id="bu-zu">不足</h2>
+<p>设置了自动折行之后，就无法在插入模式愉悦地通过上下方向键跳到下一行，因为是同属一行的，所以只能通过左右方向键跳到下一行。</p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date">17 August 2018</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/problems/">Problems</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/vim/">#vim</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/spacevim/">#SpaceVim</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

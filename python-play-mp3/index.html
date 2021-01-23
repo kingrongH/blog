@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>Python播放MP3 总结</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/python-play-mp3/#guan-yu">关于</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/python-play-mp3/#fang-fa">方法</a>
+                 <ul>
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/python-play-mp3/#playsound">playsound</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/python-play-mp3/#mp3play">mp3play</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/python-play-mp3/#pygame">pygame</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/python-play-mp3/#pyglet">pyglet</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/python-play-mp3/#pyaudio">pyaudio</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/python-play-mp3/#python-vlc">python-vlc</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/python-play-mp3/#subprocess-mpg123">subprocess &amp; mpg123</a>
+                        </li>
+                        
+                    
+                </ul> 
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/python-play-mp3/#can-kao-wen-dang">参考文档</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>Python播放MP3 总结</h1>
+    </header>
+    <div class="content">
+        <h1 id="guan-yu">关于</h1>
+<p>最近在做一个项目，需要在树莓派中使用到python来播放MP3文件，树莓派这个设备比较特殊，不像是我们库和驱动都比较齐全的电脑，里面很多东西都是精简化的。所以使用各种各样的库的过程中我总结了一下自己的经验。</p>
+<p>如何使用python播放MP3文件。</p>
+<h1 id="fang-fa">方法</h1>
+<p>花了大量的时间来进行测试，最终整理出以下的方法：</p>
+<ul>
+<li>playsound</li>
+<li>mp3play</li>
+<li>pygame</li>
+<li>pyglet</li>
+<li>pyaudio</li>
+<li>python-vlc</li>
+<li>subprocess &amp; mpg123</li>
+</ul>
+<h2 id="playsound">playsound</h2>
+<p>playsound 在我的Linux的电脑上工作正常而且工作良好。使用方法也是非常简单，</p>
+<ol>
+<li>
+<p>使用 `````pip3 install playsound` 来进行安装</p>
+</li>
+<li>
+<p>代码简单</p>
+<pre style="background-color:#1e1e1e;">
+<code> import playsound 
+ playsound.playsound('/path/to/your/mp3file')
+</code></pre></li>
+<li>
+<p><code>playsound</code> 的文档：<a href="https://pypi.org/project/playsound/">playsound</a></p>
+</li>
+</ol>
+<p>但是<code>playsound</code> 在我的树莓派上却无论如何也跑不起来，程序执行完毕也没有错误提示，弃之。</p>
+<h2 id="mp3play">mp3play</h2>
+<p><code>mp3play</code> 在我的Linux电脑上甚至都没有跑起来，原因是它支持python2或者别的什么原因</p>
+<ol>
+<li>
+<p>使用 <code>pip install mp3play</code> 进行安装</p>
+</li>
+<li>
+<p>代码示例</p>
+<pre style="background-color:#1e1e1e;">
+<code> import mp3play
+
+ filename = r'C:\Documents and Settings\Michael\Desktop\music.mp3'
+ clip = mp3play.load(filename)
+
+ clip.play()
+</code></pre></li>
+<li>
+<p><code>mp3play</code> 参考文档：<a href="https://pypi.org/project/mp3play/">mp3play</a> </p>
+</li>
+</ol>
+<p>在树莓派上同样跑不起来，弃之</p>
+<h2 id="pygame">pygame</h2>
+<p><code>pygame</code> 相较于前两者来说是一个大型的东西，它有更多的用处，但是我只想用它来播放一个mp3，没有在我的电脑上进行测试，直接在树莓派上测试成功。</p>
+<ol>
+<li>
+<p>使用<code>pip3 install pygame</code> 来进行安装</p>
+</li>
+<li>
+<p>代码示例</p>
+<pre style="background-color:#1e1e1e;">
+<code> from pygame import mixer 
+
+ mixer.init()
+ mixer.music.load('/path/to/your/mp3file')
+ mixer.music.play()
+</code></pre></li>
+<li>
+<p><code>pygame</code> 参考文档：<a href="https://www.pygame.org/docs/">pygame</a> </p>
+</li>
+</ol>
+<p><code>pygame</code> 虽然在树莓派上一次性测试成功，但是播放出来的音频却是语速失调的音频，人说话的声音听起来就像是萝莉音，弃之。</p>
+<h2 id="pyglet">pyglet</h2>
+<p><code>pyglet</code> 和<code>pygame</code>是一个级别的，但是就播放音频来说它的使用明显又复杂许多。 在树莓派上的使用失败。</p>
+<ol>
+<li>
+<p>使用 <code>pip3 install pyglet</code> 来进行安装</p>
+</li>
+<li>
+<p>代码示例</p>
+<pre style="background-color:#1e1e1e;">
+<code> import pyglet
+ from pyglet.gl import *
+ pyglet.options['audio'] = ('openal', 'directsound', 'silent')
+
+ music = pyglet.resource.media('music.mp3')
+ music.play()
+
+ pyglet.app.run()
+</code></pre></li>
+<li>
+<p><code>pyglet</code> 参考文档：<a href="https://pyglet.readthedocs.io/en/pyglet-1.3-maintenance/programming_guide/media.html">pyglet</a>
+<code>pylet</code> 虽然看起来专业很多但是对于我的项目的使用来说就很复杂，在树莓派上测试失败，弃之。在使用<code>pyglet</code>的过程中遇到一个问题在树莓派上似乎没有办法解决，那就是提示<code>AVbin</code>的相关问题，要么缺失，要么就是其他的。在树莓派上无论是下在稳定的还是最新的版本的<code>AVbin</code>都无法解决这个问题。一些相关的文档贴在这里希望能帮到各位：</p>
+</li>
+</ol>
+<p><a href="http://avbin.github.io/AVbin/Download.html">AVbin Downloads</a>
+<a href="https://stackoverflow.com/questions/10302873/python-pyglet-avbin-how-to-install-avbin">Install AVbin</a> </p>
+<h2 id="pyaudio">pyaudio</h2>
+<p><code>pyaudio</code> 使用似乎还要进行一些巧妙的设置才能进行正常的播放，我没有对它进行测试</p>
+<ol>
+<li>使用 <code>pip3 install pyaudio </code> 来进行安装</li>
+<li><code>pyaudio</code> 官方的文档：<a href="http://people.csail.mit.edu/hubert/pyaudio/">pyaudo</a></li>
+</ol>
+<h2 id="python-vlc">python-vlc</h2>
+<p><code>python-vlc</code> 是VLC 的python接口库其github地址为<a href="https://github.com/oaubert/python-vlc">python-vlc</a> ，该库的使用需要调用VLC的库，理论上是可以播放vlc支持的媒体文件。但是在我单薄的树莓派上就测试失败了。进过多次测试并解决了一些些问题，但是失败了。</p>
+<ol>
+<li>
+<p>使用<code>pip3 install python-vlc</code> 来进行安装，没有VLC还需要安装VLC：树莓派上<code>sudo apt-get install vlc</code></p>
+</li>
+<li>
+<p>代码示例</p>
+<pre style="background-color:#1e1e1e;">
+<code> import vlc 
+ p = vlc.MediaPlayer('/path/to/your/mp3file')
+ p.play()
+</code></pre></li>
+<li>
+<p><code>python-vlc</code> 的文档：<a href="https://wiki.videolan.org/PythonBinding">python-vlc</a></p>
+</li>
+</ol>
+<p>使用<code>python-vlc</code>来播放mp3从代码上看是十分简单的，但是还需要在树莓派中安装vlc的，依赖许多，很容易撞见各种问题，弃之。</p>
+<h2 id="subprocess-mpg123">subprocess &amp; mpg123</h2>
+<p><code>subprocess</code> 并不是一个直接播放音频的库，使用它来调用系统软件来播放音频，代码十分简单，音调语速上也是正常的。</p>
+<ol>
+<li>
+<p>使用 <code>sudo apt-get install mpg123</code> </p>
+</li>
+<li>
+<p>代码示例</p>
+<pre style="background-color:#1e1e1e;">
+<code> import subprocess
+ subprocess.Popen(['mpg123', '-q', '/path/to/your/mp3file']).wait()
+</code></pre></li>
+<li>
+<p>参考文档：<a href="https://docs.python.org/3/library/subprocess.html">subprocess</a> </p>
+</li>
+</ol>
+<p>这个方法或许是最为简单的方法了，依赖少，代码简洁，易于控制。在树莓派上一次试验就成功了。</p>
+<hr />
+<h1 id="can-kao-wen-dang">参考文档</h1>
+<p><a href="https://stackoverflow.com/questions/20021457/playing-mp3-song-on-python">play mp3 on python</a></p>
+<p><a href="https://stackoverflow.com/questions/26673746/playing-mp3-files-with-pyaudio">play mp3 with pyaudio</a></p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date">15 November 2018</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/python/">Python</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/python/">#python</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/mp3/">#MP3</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

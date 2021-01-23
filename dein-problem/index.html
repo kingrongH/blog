@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>dein:deoplete补全只生效一次</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/dein-problem/#wen-ti-miao-shu">问题描述</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/dein-problem/#jie-jue-ban-fa">解决办法</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/dein-problem/#gan-xiang">感想</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>dein:deoplete补全只生效一次</h1>
+    </header>
+    <div class="content">
+        <h1 id="wen-ti-miao-shu">问题描述</h1>
+<p>在使用dein作为我的vim插件管理器之后，经常出现一些我无法解决的问题。</p>
+<p>其中一个就是我使用的deoplete做为我的自动补全的插件，但是这个每次只是在我更改完vim配置之后生效一次，然后退出vim重启之后就失效了。</p>
+<h1 id="jie-jue-ban-fa">解决办法</h1>
+<p>将````````` ````````````````````````if dein#load_sate()`````````` 和对应的<code>endif</code> 删除了就好了</p>
+<h1 id="gan-xiang">感想</h1>
+<p>对自己所使用的东西不熟悉，没有一步一步来去了解如何使用dein就草草将它应用到我的配置上了。以后应当一步步来。</p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date">12 November 2018</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/problems/">Problems</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/vim/">#vim</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/deoplete/">#deoplete</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

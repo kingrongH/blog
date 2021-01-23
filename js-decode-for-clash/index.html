@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>JavaScript 解析vmess链接，供clash-linux使用</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/js-decode-for-clash/#guan-yu">关于</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/js-decode-for-clash/#yi-yi-dui-ying">一一对应</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/js-decode-for-clash/#javascriptjie-ma-base64">JavaScript解码base64</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/js-decode-for-clash/#jie-xi-wei-jsondui-xiang">解析为json对象</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/js-decode-for-clash/#zhuan-huan-wei-clashge-shi">转换为clash格式</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/js-decode-for-clash/#xu-lie-hua-wei-zi-fu-chuan">序列化为字符串</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/js-decode-for-clash/#huo-qu-ding-yue-lian-jie-nei-rong">获取订阅链接内容</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/js-decode-for-clash/#ji-zhong-chu-li-ding-yue-shu-ju">集中处理订阅数据</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/js-decode-for-clash/#gan-xiang">感想</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/js-decode-for-clash/#jie-wei">结尾</a>
+                 <ul>
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/js-decode-for-clash/#todo">todo:</a>
+                        </li>
+                        
+                    
+                </ul> 
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>JavaScript 解析vmess链接，供clash-linux使用</h1>
+    </header>
+    <div class="content">
+        <p>今天我决定将我使用JavaScript开发了一个vmess解析工具的记录po给大家看。这个工具主要是为<a href="https://github.com/Dreamacro/clash">clash</a> linux版本设计的，包含获取vmess订阅链接内容，和解析单个链接等功能。</p>
+<span id="continue-reading"></span><h2 id="guan-yu">关于</h2>
+<p>之前，我曾经使用过Python来解析ssr和ss链接，当时为自己做了这样一个小工具而兴奋不已，但是这样一个过于简单的没有经过系统设计的工具，难以逃脱短命、不被更新和被主人抛弃的命运。当时因为在Linux系统上没有ssr订阅链接的工具而倍感苦恼，下决心自己写下来一个可以订阅ssr的工具，甚至还打算了为我自己的工具做一个界面。然后，在我的脑海中夭折，甚至已经出来的功能都是现学现做的，漏洞甚多，弃。</p>
+<p>当时这样的想法算是一时冲动，但是同现在的想法却有几分相似。我想做这样一件事情是因为：</p>
+<ul>
+<li>clash-linux作为一个工具来说非常的好用</li>
+<li>clash使用yaml配置文件作为它节点的接口，非常适合进一步开发</li>
+<li>clash没有支持vmess链接导入的功能</li>
+<li>我喜欢折腾</li>
+</ul>
+<p>大抵是因为这样，我为自己做了这样一个工具。</p>
+<h2 id="yi-yi-dui-ying">一一对应</h2>
+<p>在手动配置clash的config.yml的时候，我便有一些困惑，和其他vmess工具使用配置属性名称都不一样。</p>
+<p>一个clash的vmess配置大概长这样：</p>
+<pre style="background-color:#1e1e1e;">
+<code>{ name: &quot;vmess&quot;, type: vmess, server: server, port: 443, uuid: uuid, alterId: 32, cipher: auto, tls: true }
+</code></pre>
+<p>而v2ryN的配置长这样：</p>
+<pre style="background-color:#1e1e1e;">
+<code><span style="color:#dcdcdc;">{
+&quot;v&quot;: &quot;2&quot;,
+&quot;ps&quot;: &quot;备注别名&quot;,
+&quot;add&quot;: &quot;111.111.111.111&quot;,
+&quot;port&quot;: &quot;32000&quot;,
+&quot;id&quot;: &quot;1386f85e-657b-4d6e-9d56-78badb75e1fd&quot;,
+&quot;aid&quot;: &quot;100&quot;,
+&quot;net&quot;: &quot;tcp&quot;,
+&quot;type&quot;: &quot;none&quot;,
+&quot;host&quot;: &quot;www.bbb.com&quot;,
+&quot;path&quot;: &quot;/&quot;,
+&quot;tls&quot;: &quot;tls&quot;
+
+}
+</span></code></pre>
+<p>两个配置文件的范例分别可以在<a href="https://github.com/Dreamacro/clash">clash</a> 和<a href="https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2)">v2rayN wiki</a>。</p>
+<p>我并没有一下子就建立起来两者的一一对应关系，而是花了一些时间。我在接下来的格式解析的过程中肯定需要使用到这样一个一一对应的关系的：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">table = {
+	ps:</span><span style="color:#d69d85;">&quot;name&quot;</span><span style="color:#dcdcdc;">,
+	add:</span><span style="color:#d69d85;">&quot;server&quot;</span><span style="color:#dcdcdc;">,
+	port:</span><span style="color:#d69d85;">&quot;port&quot;</span><span style="color:#dcdcdc;">,
+	id:</span><span style="color:#d69d85;">&quot;uuid&quot;</span><span style="color:#dcdcdc;">,
+	aid:</span><span style="color:#d69d85;">&quot;alterId&quot;</span><span style="color:#dcdcdc;">,
+	security:</span><span style="color:#d69d85;">&quot;cipher&quot;</span><span style="color:#dcdcdc;">,
+	tls:</span><span style="color:#d69d85;">&quot;tls&quot;</span><span style="color:#dcdcdc;">, </span><span style="color:#608b4e;">// vmess中value为&quot;tls&quot;或者&quot;&quot;，而clash中为true/false
+	</span><span style="color:#dcdcdc;">net:</span><span style="color:#d69d85;">&quot;network&quot; </span><span style="color:#608b4e;">//vmess 支持tcp，clash不支持
+</span><span style="color:#dcdcdc;">};
+</span></code></pre>
+<p>其中一些需要注意的点写在了注释中，另一些vmess有的而clash没有的要么是不支持要么是没紧要的。</p>
+<h2 id="javascriptjie-ma-base64">JavaScript解码base64</h2>
+<p>vmess链接的格式为<code>vmess://[base64编码的节点信息]</code>所以我自然需要知道在JavaScript如何解码base64的字符串。我的代码如下：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#608b4e;">/* decode base64
+ * note: because vmess support return for a encoded string, add a trim char check
+ * @param s string 
+ * @return string
+ */
+</span><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">decode(s){
+	</span><span style="color:#608b4e;">//delete the \n\r 
+	</span><span style="color:#dcdcdc;">s.replace(</span><span style="color:#d69d85;">/</span><span style="color:#b4cea8;">\s</span><span style="color:#569cd6;">+</span><span style="color:#d69d85;">/</span><span style="color:#569cd6;">g</span><span style="color:#dcdcdc;">,</span><span style="color:#d69d85;">&quot;&quot;</span><span style="color:#dcdcdc;">);
+	</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(s.length%</span><span style="color:#b5cea8;">4 </span><span style="color:#dcdcdc;">!== </span><span style="color:#b5cea8;">0</span><span style="color:#dcdcdc;">){
+		s = s + s.length%</span><span style="color:#b5cea8;">4</span><span style="color:#dcdcdc;">*</span><span style="color:#d69d85;">&quot;=&quot;</span><span style="color:#dcdcdc;">;
+		console.log(s);
+	}
+	</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">buf = Buffer.from(s, </span><span style="color:#d69d85;">&#39;base64&#39;</span><span style="color:#dcdcdc;">);
+	</span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">buf.toString(</span><span style="color:#d69d85;">&#39;utf8&#39;</span><span style="color:#dcdcdc;">);
+}
+</span><span style="color:#608b4e;">/* decode vmess, ss or ssr link
+ * @param s string
+ * @return string
+ */
+</span><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">linkDecode(s){
+	</span><span style="color:#608b4e;">//judge if supported link
+	</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(s.startsWith(</span><span style="color:#d69d85;">&quot;vmess://&quot;</span><span style="color:#dcdcdc;">)){
+		</span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">decode(s.substring(</span><span style="color:#b5cea8;">8</span><span style="color:#dcdcdc;">));
+	}</span><span style="color:#569cd6;">else if</span><span style="color:#dcdcdc;">(s.startsWith(</span><span style="color:#d69d85;">&quot;ssr://&quot;</span><span style="color:#dcdcdc;">)){
+		</span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">decode(s.substring(</span><span style="color:#b5cea8;">6</span><span style="color:#dcdcdc;">));
+	}</span><span style="color:#569cd6;">else if</span><span style="color:#dcdcdc;">(s.startsWith(</span><span style="color:#d69d85;">&quot;ss://&quot;</span><span style="color:#dcdcdc;">)){
+		</span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">decode(s.substring(</span><span style="color:#b5cea8;">5</span><span style="color:#dcdcdc;">));
+	}</span><span style="color:#569cd6;">else</span><span style="color:#dcdcdc;">{
+		console.warn(</span><span style="color:#d69d85;">&quot;a illegal link: &quot;</span><span style="color:#dcdcdc;">+ </span><span style="color:#d69d85;">`</span><span style="color:#dcdcdc;">${s}</span><span style="color:#d69d85;">`</span><span style="color:#dcdcdc;">);
+	}
+}
+</span></code></pre>
+<p>这里包含两个部分，一个单纯的解码字符串，一个是针对链接来解码，为了以后，我多做了一些工作，不过可能是白做，哈哈哈。</p>
+<p>之所以去除字符串中的空白字符，是因为在测试过程中发现v2rayN支持的先加密后换行的格式。</p>
+<h2 id="jie-xi-wei-jsondui-xiang">解析为json对象</h2>
+<p>获取到字符串格式的节点信息之后，需要将这些信息提取出来到一个JavaScript对象中，以便做进一步处理</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#608b4e;">/* parse string to obj
+ * @param s string
+ * @return object
+ */
+</span><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">parse(s){
+	</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(</span><span style="color:#687687;">typeof </span><span style="color:#dcdcdc;">s !== </span><span style="color:#d69d85;">&quot;string&quot;</span><span style="color:#dcdcdc;">){
+		console.warn(</span><span style="color:#d69d85;">`parsing a not-string obj: </span><span style="color:#dcdcdc;">${s}</span><span style="color:#d69d85;"> aborted!`</span><span style="color:#dcdcdc;">)
+	}</span><span style="color:#569cd6;">else</span><span style="color:#dcdcdc;">{
+		</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">ob = </span><span style="color:#b5cea8;">JSON</span><span style="color:#dcdcdc;">.parse(s);
+		</span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">ob;
+	}
+}
+</span></code></pre>
+<p>返回包含节点信息的对象ob</p>
+<h2 id="zhuan-huan-wei-clashge-shi">转换为clash格式</h2>
+<p>参照我们之前制作的那个table对象，我们再将获得的含有节点信息的对象，一一转换为clash支持的形式，并返回新的对象。我的代码：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#608b4e;">/* convert the obj from vmess link to the obj that clash accept
+ * @param ob object
+ * @return object
+ */
+</span><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">clashFormat(ob){
+	</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(</span><span style="color:#687687;">typeof</span><span style="color:#dcdcdc;">(ob)!==</span><span style="color:#d69d85;">&quot;object&quot;</span><span style="color:#dcdcdc;">){
+		console.warn(</span><span style="color:#d69d85;">&quot;clash Format:can only format object&quot;</span><span style="color:#dcdcdc;">);
+	}</span><span style="color:#569cd6;">else</span><span style="color:#dcdcdc;">{
+		</span><span style="color:#608b4e;">//a table for refer
+		</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">table = {
+			ps:</span><span style="color:#d69d85;">&quot;name&quot;</span><span style="color:#dcdcdc;">,
+			add:</span><span style="color:#d69d85;">&quot;server&quot;</span><span style="color:#dcdcdc;">,
+			port:</span><span style="color:#d69d85;">&quot;port&quot;</span><span style="color:#dcdcdc;">,
+			id:</span><span style="color:#d69d85;">&quot;uuid&quot;</span><span style="color:#dcdcdc;">,
+			aid:</span><span style="color:#d69d85;">&quot;alterId&quot;</span><span style="color:#dcdcdc;">,
+			security:</span><span style="color:#d69d85;">&quot;cipher&quot;</span><span style="color:#dcdcdc;">,
+			tls:</span><span style="color:#d69d85;">&quot;tls&quot;
+		</span><span style="color:#dcdcdc;">};
+		</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">defaultV = {
+			name:</span><span style="color:#d69d85;">&quot;local&quot;</span><span style="color:#dcdcdc;">,
+			type:</span><span style="color:#d69d85;">&quot;vmess&quot;</span><span style="color:#dcdcdc;">,
+			server:</span><span style="color:#d69d85;">&quot;127.0.0.1&quot;</span><span style="color:#dcdcdc;">,
+			port:</span><span style="color:#b5cea8;">1080</span><span style="color:#dcdcdc;">,
+			uuid:</span><span style="color:#d69d85;">&quot;&quot;</span><span style="color:#dcdcdc;">,
+			alterId:</span><span style="color:#b5cea8;">0</span><span style="color:#dcdcdc;">,
+			cipher:</span><span style="color:#d69d85;">&quot;auto&quot;</span><span style="color:#dcdcdc;">,
+			tls:</span><span style="color:#569cd6;">false</span><span style="color:#dcdcdc;">,
+			</span><span style="color:#d69d85;">&quot;skip-cert-verify&quot;</span><span style="color:#dcdcdc;">:</span><span style="color:#569cd6;">true
+		</span><span style="color:#dcdcdc;">};
+		</span><span style="color:#569cd6;">for</span><span style="color:#dcdcdc;">(</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">key </span><span style="color:#569cd6;">in </span><span style="color:#dcdcdc;">ob){
+			</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(key === </span><span style="color:#d69d85;">&quot;tls&quot;</span><span style="color:#dcdcdc;">){
+				</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(ob[key]===</span><span style="color:#d69d85;">&quot;tls&quot;</span><span style="color:#dcdcdc;">){
+					defaultV[table[key]] = </span><span style="color:#569cd6;">true</span><span style="color:#dcdcdc;">;
+				}
+			}</span><span style="color:#569cd6;">else if</span><span style="color:#dcdcdc;">(table[key]){
+				defaultV[table[key]] = ob[key];
+			}
+		}
+		</span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">defaultV;
+	}
+}
+</span></code></pre>
+<p>我建立一个默认值的对象，便于修改。对我们获取到的对象中的属性遍历，如果是table中存在的，将defaultV中对应的值赋给ob中对应的值，最后返回defaultV。其中我们需要对一些特殊的属性做一些特殊处理，比如<code>tls</code>它在两种格式中值的类型是不一样的，需要做转换。</p>
+<p>目前我还没有加入<code>network</code>支持，因为我所知的大部分机场都使用的<code>tcp</code>而clash还没有支持这个。</p>
+<h2 id="xu-lie-hua-wei-zi-fu-chuan">序列化为字符串</h2>
+<p>对于获得clash格式的对象，我们需要将它序列化为字符串，便于输出，无论是写入文件还是输出到终端。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#608b4e;">/* parse object to yarml format, return a string
+ * note: this only can parse obj returned from clashFormat()
+ * @param ob object
+ * @return string
+ */
+</span><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">objParseToYaml(ob){
+	</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(</span><span style="color:#687687;">typeof</span><span style="color:#dcdcdc;">(ob)!==</span><span style="color:#d69d85;">&quot;object&quot;</span><span style="color:#dcdcdc;">){
+		</span><span style="color:#569cd6;">throw </span><span style="color:#dcdcdc;">Error(</span><span style="color:#d69d85;">&quot;Only can parse object&quot;</span><span style="color:#dcdcdc;">);
+	}
+	</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">s = </span><span style="color:#b5cea8;">JSON</span><span style="color:#dcdcdc;">.stringify(ob);
+	</span><span style="color:#569cd6;">return </span><span style="color:#dcdcdc;">s;
+}
+</span></code></pre>
+<p>事实上，一开始我以为，clash所支持的yaml的配置是需要去除引号，但是保留name值的引号的，因为官方的配置是只保留了name值的引号，所以我费了一番功夫，想要保留这个引号同时去除其他的引号。后来经过我的一些测试发现不需要这么做，一个引号也不用去除。为了保证clash不会报错，我确实一个也没有去除。只是美观不足而已，所以得到的字符串大概长这样</p>
+<pre style="background-color:#1e1e1e;">
+<code>{&quot;name&quot;:&quot;xxxx&quot;,&quot;type&quot;:&quot;vmess&quot;,&quot;server&quot;:&quot;xxxx.xxx.xx&quot;,&quot;port&quot;:&quot;443&quot;,&quot;uuid&quot;:&quot;27848739-7e62-4138-9fd3-098a63964b6b&quot;,&quot;alterId&quot;:&quot;0&quot;,&quot;cipher&quot;:&quot;auto&quot;,&quot;tls&quot;:false}
+</code></pre>
+<p>如果将这个放到配置文件中却是不怎么好看。</p>
+<p>到这里我们的工作可以说完成了核心部分了。但是我们还有更进一步的事情需要做，比如输出，比如获取订阅链接。不过都是一些外层的设计，但是对我来说，却是更难的部分。</p>
+<h2 id="huo-qu-ding-yue-lian-jie-nei-rong">获取订阅链接内容</h2>
+<p>获取订阅链接的内容，在JavaScript中我们需要调用到<code>http</code>和<code>https</code>，因为我们无法保证机场使用的都是一样的协议，所以我们两个都引入。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#569cd6;">const </span><span style="color:#dcdcdc;">http = require(</span><span style="color:#d69d85;">&quot;http&quot;</span><span style="color:#dcdcdc;">);
+</span><span style="color:#569cd6;">const </span><span style="color:#dcdcdc;">https = require(</span><span style="color:#d69d85;">&quot;https&quot;</span><span style="color:#dcdcdc;">);
+</span></code></pre>
+<p>nodejs中几乎所有的http和https操作都是异步的，所以我们需要考虑到返回值的问题。相对于其他的编程语言来说，获取响应这个部分确实是更加的麻烦了。但是在这样的繁复中至少我们还有语法糖<code>async/await</code>，整个编码过程都甜蜜了一些。</p>
+<p>一开始我以为，获取订阅链接响应的代码只要这么写就够了：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#608b4e;">/* handle subscribe link, get the response
+ * @param url
+ * @return Promise resove(string)
+ */
+</span><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">getRes(url){
+	</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(</span><span style="color:#687687;">typeof </span><span style="color:#dcdcdc;">url !== </span><span style="color:#d69d85;">&quot;string&quot; </span><span style="color:#569cd6;">|| !</span><span style="color:#dcdcdc;">(url.startsWith(</span><span style="color:#d69d85;">&quot;http://&quot;</span><span style="color:#dcdcdc;">) </span><span style="color:#569cd6;">|| </span><span style="color:#dcdcdc;">url.startsWith(</span><span style="color:#d69d85;">&quot;https://&quot;</span><span style="color:#dcdcdc;">))){
+		</span><span style="color:#569cd6;">throw new </span><span style="color:#dcdcdc;">Error(</span><span style="color:#d69d85;">&quot;Only can handle link format!&quot;</span><span style="color:#dcdcdc;">);
+	}
+	</span><span style="color:#569cd6;">return new </span><span style="color:#dcdcdc;">Promise((resolve)</span><span style="color:#569cd6;">=&gt;</span><span style="color:#dcdcdc;">{
+		</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(url.startsWith(</span><span style="color:#d69d85;">&quot;http://&quot;</span><span style="color:#dcdcdc;">)){
+			</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">req = http.get(url,(res)</span><span style="color:#569cd6;">=&gt;</span><span style="color:#dcdcdc;">{
+				</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(res.statusCode !== </span><span style="color:#b5cea8;">200</span><span style="color:#dcdcdc;">){
+					</span><span style="color:#569cd6;">throw new </span><span style="color:#dcdcdc;">Error(</span><span style="color:#d69d85;">&quot;Request failed please check your Internet connection!</span><span style="color:#e3bbab;">\n</span><span style="color:#d69d85;">&quot; </span><span style="color:#dcdcdc;">+ </span><span style="color:#d69d85;">`statusCode: </span><span style="color:#dcdcdc;">${res.statusCode}</span><span style="color:#d69d85;">`</span><span style="color:#dcdcdc;">);
+				}
+				res.on(</span><span style="color:#d69d85;">&quot;data&quot;</span><span style="color:#dcdcdc;">,(chunk)</span><span style="color:#569cd6;">=&gt;</span><span style="color:#dcdcdc;">{
+					resolve(chunk)
+				});
+			});
+		}</span><span style="color:#569cd6;">else if</span><span style="color:#dcdcdc;">(url.startsWith(</span><span style="color:#d69d85;">&quot;https://&quot;</span><span style="color:#dcdcdc;">)){
+			</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">req = https.get(url,(res)</span><span style="color:#569cd6;">=&gt;</span><span style="color:#dcdcdc;">{
+				</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(res.statusCode !== </span><span style="color:#b5cea8;">200</span><span style="color:#dcdcdc;">){
+					</span><span style="color:#569cd6;">throw new </span><span style="color:#dcdcdc;">Error(</span><span style="color:#d69d85;">&quot;Request failed please check your Internet connection!</span><span style="color:#e3bbab;">\n</span><span style="color:#d69d85;">&quot; </span><span style="color:#dcdcdc;">+ </span><span style="color:#d69d85;">`statusCode: </span><span style="color:#dcdcdc;">${res.statusCode}</span><span style="color:#d69d85;">`</span><span style="color:#dcdcdc;">);
+				}
+				res.setEncoding(</span><span style="color:#d69d85;">&quot;utf8&quot;</span><span style="color:#dcdcdc;">);
+				res.on(</span><span style="color:#d69d85;">&quot;data&quot;</span><span style="color:#dcdcdc;">,(chunk)</span><span style="color:#569cd6;">=&gt;</span><span style="color:#dcdcdc;">{
+					resolve(chunk);
+				});
+			});
+		}
+	});
+}
+</span></code></pre>
+<p>看起来似乎没什么问题，我返回了一个Promise对象，resolve了我请求到的数据，并且考虑到了种种Error的情况，在接下来的操作中我只需要<code>await</code>这个函数完成，返回我们的响应数据，多么美好。</p>
+<p>然而我还是太天真了，有一些机场他们更愿意使用<code>stream</code>类型来传回数据，就连我们获得的响应也都是突突突一阵一阵的（忽然想起来普朗克），这种情况下，我可能只是获得了第一阵的数据，就开始急急忙忙地进行下一步操作了。所以我们应该等整个请求完成了再<code>resolve</code>获得的整个数据。代码看起来如下：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#608b4e;">/* handle subscribe link, get the response
+ * @param url
+ * @return Promise resove(string)
+ */
+</span><span style="color:#569cd6;">function </span><span style="color:#dcdcdc;">getRes(url){
+	</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(</span><span style="color:#687687;">typeof </span><span style="color:#dcdcdc;">url !== </span><span style="color:#d69d85;">&quot;string&quot; </span><span style="color:#569cd6;">|| !</span><span style="color:#dcdcdc;">(url.startsWith(</span><span style="color:#d69d85;">&quot;http://&quot;</span><span style="color:#dcdcdc;">) </span><span style="color:#569cd6;">|| </span><span style="color:#dcdcdc;">url.startsWith(</span><span style="color:#d69d85;">&quot;https://&quot;</span><span style="color:#dcdcdc;">))){
+		</span><span style="color:#569cd6;">throw new </span><span style="color:#dcdcdc;">Error(</span><span style="color:#d69d85;">&quot;Only can handle link format!&quot;</span><span style="color:#dcdcdc;">);
+	}
+	</span><span style="color:#569cd6;">return new </span><span style="color:#dcdcdc;">Promise((resolve)</span><span style="color:#569cd6;">=&gt;</span><span style="color:#dcdcdc;">{
+		</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">strings = [];
+		</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(url.startsWith(</span><span style="color:#d69d85;">&quot;http://&quot;</span><span style="color:#dcdcdc;">)){
+			</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">req = http.get(url,(res)</span><span style="color:#569cd6;">=&gt;</span><span style="color:#dcdcdc;">{
+				</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(res.statusCode !== </span><span style="color:#b5cea8;">200</span><span style="color:#dcdcdc;">){
+					</span><span style="color:#569cd6;">throw new </span><span style="color:#dcdcdc;">Error(</span><span style="color:#d69d85;">&quot;Request failed please check your Internet connection!</span><span style="color:#e3bbab;">\n</span><span style="color:#d69d85;">&quot; </span><span style="color:#dcdcdc;">+ </span><span style="color:#d69d85;">`statusCode: </span><span style="color:#dcdcdc;">${res.statusCode}</span><span style="color:#d69d85;">`</span><span style="color:#dcdcdc;">);
+				}
+				res.on(</span><span style="color:#d69d85;">&quot;data&quot;</span><span style="color:#dcdcdc;">,(chunk)</span><span style="color:#569cd6;">=&gt;</span><span style="color:#dcdcdc;">{
+					strings.push(chunk);
+				});
+			});
+		}</span><span style="color:#569cd6;">else if</span><span style="color:#dcdcdc;">(url.startsWith(</span><span style="color:#d69d85;">&quot;https://&quot;</span><span style="color:#dcdcdc;">)){
+			</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">req = https.get(url,(res)</span><span style="color:#569cd6;">=&gt;</span><span style="color:#dcdcdc;">{
+				</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(res.statusCode !== </span><span style="color:#b5cea8;">200</span><span style="color:#dcdcdc;">){
+					</span><span style="color:#569cd6;">throw new </span><span style="color:#dcdcdc;">Error(</span><span style="color:#d69d85;">&quot;Request failed please check your Internet connection!</span><span style="color:#e3bbab;">\n</span><span style="color:#d69d85;">&quot; </span><span style="color:#dcdcdc;">+ </span><span style="color:#d69d85;">`statusCode: </span><span style="color:#dcdcdc;">${res.statusCode}</span><span style="color:#d69d85;">`</span><span style="color:#dcdcdc;">);
+				}
+				res.setEncoding(</span><span style="color:#d69d85;">&quot;utf8&quot;</span><span style="color:#dcdcdc;">);
+				res.on(</span><span style="color:#d69d85;">&quot;data&quot;</span><span style="color:#dcdcdc;">,(chunk)</span><span style="color:#569cd6;">=&gt;</span><span style="color:#dcdcdc;">{
+					</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(chunk){
+						strings.push(chunk);
+					}
+				});
+			});
+		}
+		</span><span style="color:#608b4e;">// once the request done, join the chunks together, and resolve it
+		</span><span style="color:#dcdcdc;">req.on(</span><span style="color:#d69d85;">&#39;close&#39;</span><span style="color:#dcdcdc;">,()</span><span style="color:#569cd6;">=&gt;</span><span style="color:#dcdcdc;">{
+			resolve(strings.join(</span><span style="color:#d69d85;">&quot;&quot;</span><span style="color:#dcdcdc;">));
+		});
+	});
+}
+</span></code></pre>
+<p>我们在返回的Promise对象中定义了一个字符串数组，并且将每一次获取到的数据都<code>push</code>进去，在请求结束之后，将数组中所有的数据<code>join</code>到一起，然后<code>resolve</code>它，美滋滋。</p>
+<h2 id="ji-zhong-chu-li-ding-yue-shu-ju">集中处理订阅数据</h2>
+<p>我们获取到了一堆base64编码后的数据它很长，我们要对这个长长的数据做进一步处理：解码、解析和输出。这个数据在base64编码之前是以换行符分开不同的<code>vmess</code>链接的，我们获取该数据后，解码，再以空白字符分割，对每一个链接再进行解码，解析，转换clash格式，序列化和输出。</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-JavaScript" data-lang="JavaScript"><span style="color:#608b4e;">// async function used to handle data get from getRes()
+// split the data to the list and convert ervery one to the clash supported format
+// and parse the link to the yarml string 
+</span><span style="color:#569cd6;">async function </span><span style="color:#dcdcdc;">handleSubData(subUrl){
+	</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">data = </span><span style="color:#d69d85;">&quot;&quot;</span><span style="color:#dcdcdc;">;
+	data = </span><span style="color:#569cd6;">await </span><span style="color:#dcdcdc;">getRes(subUrl);
+	</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">linkList = decode(data).split(</span><span style="color:#d69d85;">/</span><span style="color:#b4cea8;">\s</span><span style="color:#569cd6;">+</span><span style="color:#d69d85;">/</span><span style="color:#dcdcdc;">);
+	</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">configs = [];
+	</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">configStrings = [];
+	</span><span style="color:#569cd6;">var </span><span style="color:#dcdcdc;">names = [];
+	</span><span style="color:#569cd6;">for</span><span style="color:#dcdcdc;">(link </span><span style="color:#569cd6;">of </span><span style="color:#dcdcdc;">linkList){
+		</span><span style="color:#608b4e;">//if link is not empty string
+		</span><span style="color:#569cd6;">if</span><span style="color:#dcdcdc;">(link){
+			</span><span style="color:#569cd6;">let	</span><span style="color:#dcdcdc;">temp = linkDecode(link);
+			</span><span style="color:#569cd6;">let </span><span style="color:#dcdcdc;">tempObj = parse(temp);
+			</span><span style="color:#569cd6;">let </span><span style="color:#dcdcdc;">tempClashObj = clashFormat(tempObj);
+			configs.push(tempClashObj);
+			names.push(tempClashObj.name);
+			</span><span style="color:#569cd6;">let </span><span style="color:#dcdcdc;">tempClashStr = objParseToYaml(tempClashObj);
+			</span><span style="color:#608b4e;">// log like this is to make it easier to copy and paste
+			</span><span style="color:#dcdcdc;">console.log(</span><span style="color:#d69d85;">&quot;- &quot; </span><span style="color:#dcdcdc;">+ tempClashStr);
+			configStrings.push(tempClashStr);
+		}
+	}
+	console.log(names);
+}
+</span><span style="color:#608b4e;">/* cli support 
+ *
+ *
+ */
+</span><span style="color:#569cd6;">async function </span><span style="color:#dcdcdc;">shellStart(){
+	</span><span style="color:#569cd6;">const </span><span style="color:#dcdcdc;">rl =readline.createInterface({
+		input:</span><span style="color:#b5cea8;">process</span><span style="color:#dcdcdc;">.</span><span style="color:#b5cea8;">stdin</span><span style="color:#dcdcdc;">,
+		output:</span><span style="color:#b5cea8;">process</span><span style="color:#dcdcdc;">.</span><span style="color:#b5cea8;">stdout
+	</span><span style="color:#dcdcdc;">});
+
+   	rl.question(</span><span style="color:#d69d85;">&quot;Input the vmess link: &quot;</span><span style="color:#dcdcdc;">, (answer)</span><span style="color:#569cd6;">=&gt;</span><span style="color:#dcdcdc;">{
+		handleSubData(answer);
+		console.log(</span><span style="color:#d69d85;">&quot;Please wait the result!&quot;</span><span style="color:#dcdcdc;">);
+		rl.close();
+	});
+}
+</span></code></pre>
+<p>你需要执行<code>shellStart()</code>，然后填入你的订阅链接，就会出来结果。</p>
+<p>我输出了所有可以直接复制进去<code>config.yml</code>的所有节点信息和由所有节点的name值组成的一个数组，方便操作。</p>
+<p>事实上，我可以使用更加美好的输出方式，比如输出到文本文件中，直接生成<code>config.yml</code>或者干脆做一个GUI，但是我没有，我只使用了<code>console.log</code>，你需要自己复制进去。也许未来我可以把更好的方式添加进去。</p>
+<h2 id="gan-xiang">感想</h2>
+<p>这个小工具花了一天多的时间。在编码的过程中，我尽量先在笔记中写下自己的思路，然后才开始编码。这种方式对我来说实在是大有裨益，难怪过来人都喜欢这么说:</p>
+<blockquote>
+<p>一个好的程序员应该花80%的时间编写文档，然后花20%的时间来写代码和debug。</p>
+</blockquote>
+<p>我对于这样一句话，现在有了更加深刻的理解。</p>
+<h2 id="jie-wei">结尾</h2>
+<p>这样短小的代码量，还是有好些地方做不好，比如，也许你发现了，我在处理错误上并没有做好，我希望能够在接下来的时间慢慢地改进。</p>
+<p>接下来还有很多要做的：</p>
+<h5 id="todo">todo:</h5>
+<ul>
+<li>更好的错误处理方式，比如说写一个logger</li>
+<li>更好的输出方式，比如生成<code>config.yml</code></li>
+<li>更好的交互方式，比如cli+参数运行clash</li>
+<li>更多的支持，比如支持<code>ss</code></li>
+<li>...</li>
+</ul>
+<p>如果你能有更好的方式或者建议欢迎你在评论区提出，或者直接联系我<a href="https://github.com/kingrongH">github</a>。</p>
+<hr />
+<p>参考链接：
+1. <a href="https://github.com/Dreamacro/clash">clash</a>
+2. <a href="https://github.com/2dust/v2rayN/wiki">v2rayN wiki</a></p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date">12 April 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/javascript/">JavaScript</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/javascript/">#JavaScript</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/vmess/">#vmess</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/clash/">#Clash</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

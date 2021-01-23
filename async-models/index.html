@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <title>编程语言中的异步IO模型</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;main.css">
+
+    
+
+    
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to content</a>
+    <div class="container">
+        <header> 
+            <h1 class="site-header">
+                <a href="https:&#x2F;&#x2F;blog.kingrong.kr">kingrong&#x27;s blog</a>
+            </h1>
+            <nav>
+                
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;">Home</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;categories">Categories</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;tags&#x2F;">Tags</a>
+                
+                
+                <a  href="https:&#x2F;&#x2F;blog.kingrong.kr&#x2F;about&#x2F;">About</a>
+                
+                
+            </nav>
+        </header>
+
+        <!-- 目录 -->
+        <div> 
+    <aside id="toc-aside" class="right-to-left">
+        <h2>Table of Contents</h2>
+        <ul>
+             <li>
+                <a href="https://blog.kingrong.kr/async-models/#ling-cheng-ben-chou-xiang">零成本抽象</a>
+                
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/async-models/#yu-yan-zhong-de-yi-bu-bian-cheng-mo-xing">语言中的异步编程模型</a>
+                 <ul>
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/async-models/#lu-se-xian-cheng-mo-xing">绿色线程模型</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/async-models/#future-mo-xing-ji-yu-hui-diao">Future 模型（基于回调）</a>
+                        </li>
+                        
+                    
+                        <li>
+                            <a href="https://blog.kingrong.kr/async-models/#rustde-yi-bu-mo-xing-ji-yu-poll">Rust的异步模型（基于Poll）</a>
+                        </li>
+                        
+                    
+                </ul> 
+            </li>  <li>
+                <a href="https://blog.kingrong.kr/async-models/#can-kao-lian-jie">参考连接</a>
+                
+            </li> 
+            <li class="toc-comments-link"><a href="#Comments">Comments</a></li>
+        </ul>
+    </aside>
+ </div>
+
+        <main id="main" tabindex="-1">
+            
+
+<article class="post">
+    <header>
+        <h1>编程语言中的异步IO模型</h1>
+    </header>
+    <div class="content">
+        <p>在看先前的拉丁美洲的Rustconf，偶然看到了<em>Without Boats</em>大佬的关于零成本异步IO的介绍。</p>
+<p>在其中学习到一些异步编程模型，在此做一个总结。 </p>
+<p>视频链接：<a href="https://youtu.be/skos4B5x7qE?list=PL85XCvVPmGQjuWUNeFCgl8X2EOC_aAq5N">Without Boats: Zero-Cost Async IO</a></p>
+<iframe width="889" height="500" src="https://www.youtube.com/embed/skos4B5x7qE?list=PL85XCvVPmGQjuWUNeFCgl8X2EOC_aAq5N" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<span id="continue-reading"></span><h2 id="ling-cheng-ben-chou-xiang">零成本抽象</h2>
+<blockquote>
+<p>What you don’t use, you don’t pay for. And further: What you do use, you couldn’t hand code any better.</p>
+</blockquote>
+<p>这是<em>Without Boats</em>在视频里对零成本抽象的介绍。这是由C++发展过来的好东西。我主要有一下两点理解（好吧，就是简单的翻译（逃。。）：</p>
+<ul>
+<li>对于你用不上的东西，它不会对你的程序性能产生影响</li>
+<li>对于需要用上的东西，你不能找到更好的方式使性能更佳</li>
+</ul>
+<p>提出这个定义的人提出了一个很棒的东西。</p>
+<h2 id="yu-yan-zhong-de-yi-bu-bian-cheng-mo-xing">语言中的异步编程模型</h2>
+<p>每一种异步IO模型都有相应的典型语言的。</p>
+<h3 id="lu-se-xian-cheng-mo-xing">绿色线程模型</h3>
+<p>首先介绍绿色线程，这在rust官网的<em>The Book</em>的无畏并发中有设计。Rust官方库中的线程模型是对应的就是OS的线程模型，即1:1，一个OS线程对应的就是一个编程语言的线程，这样换来了Rust中相较于其他编程语言的更小的运行时，意味着更小的开销。不同的编程语言可能有不同的特殊的线程模型，可能是<code>M</code>个绿色线程对应<code>N</code>个OS线程。所以绿色线程就是不同于OS线程的编程语言中的自己的线程实现。</p>
+<p>使用绿色线程来实现异步编程的语言中实现异步的方式就是新创建一个绿色线程，然后在这个绿色线程中执行异步IO代码。</p>
+<p>使用绿色线程实现异步IO的语言有：Java和Go</p>
+<p>这个方式很棒，但是这个方式不属于零成本抽象的范畴。原因是：这个方式需要在语言层面的Runtime增加去调度绿色线程的代码，这意味着即便你的用户不需要用到异步IO功能，他还是需要为此付出代价。</p>
+<h3 id="future-mo-xing-ji-yu-hui-diao"><strong>Future</strong> 模型（基于回调）</h3>
+<p>一个_future_代表着一个还没有准备好的值。</p>
+<p>_future_在JavaScript中有另一个名字<code>Promise</code>，熟悉JavaScript的同学对这个关键词应该不陌生。在JavaScript中我们给每一个Promise都设置一个回调（resolve, reject）。当我们的Promise准备好的时候，会去调用resolve中的代码或者是reject中的代码。这种方式是非常棒的方式。</p>
+<p>在ES2017，JavaScript的作者们将<code>async</code>和<code>await</code>语法实现到了JavaScript中，这简直极大的方便了我们去编写异步的代码。</p>
+<p>通过以上的JavaScript的<code>Promise</code>实现。我们可以知道：</p>
+<ol>
+<li>使用回调方式的<code>Future</code>模型</li>
+<li><code>Future</code>模型可以实现为<code>async</code>和<code>await</code>语法</li>
+</ol>
+<p>这个方式也非常Amazing，但是这种方式同样不属于零成本抽象的范畴。原因是：使用回调的方式并不是使性能最佳的方式，他还可以有更好的实现。</p>
+<h3 id="rustde-yi-bu-mo-xing-ji-yu-poll"><em>Rust</em>的异步模型（基于Poll）</h3>
+<p>基于回调的<code>Future</code>模型大抵是这样的：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-rust" data-lang="rust"><span style="color:#569cd6;">trait </span><span style="color:#dcdcdc;">Future {
+    </span><span style="color:#569cd6;">type </span><span style="color:#4ec9b0;">Output</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">fn </span><span style="color:#dcdcdc;">schedule&lt;F&gt;(self, callback: F)
+    </span><span style="color:#569cd6;">where</span><span style="color:#dcdcdc;"> F: FnOnce(</span><span style="color:#569cd6;">Self::</span><span style="color:#dcdcdc;">Output);
+}
+</span></code></pre>
+<p>基于Poll的<code>Future</code>模型大约长这样：</p>
+<pre style="background-color:#1e1e1e;">
+<code class="language-rust" data-lang="rust"><span style="color:#569cd6;">trait </span><span style="color:#dcdcdc;">Future {
+    </span><span style="color:#569cd6;">type </span><span style="color:#4ec9b0;">Output</span><span style="color:#dcdcdc;">;
+    </span><span style="color:#569cd6;">fn </span><span style="color:#dcdcdc;">poll(</span><span style="color:#569cd6;">&amp;mut </span><span style="color:#dcdcdc;">self, waker: </span><span style="color:#569cd6;">&amp;</span><span style="color:#dcdcdc;">Waker) -&gt; Poll&lt;</span><span style="color:#569cd6;">Self::</span><span style="color:#dcdcdc;">Output&gt;;
+}
+</span><span style="color:#569cd6;">enum </span><span style="color:#dcdcdc;">Poll {
+    Ready&lt;T&gt;,
+    Pending,
+}
+</span></code></pre>
+<p>观察这两者的区别，我们发现基于回调的模型，我们需要在它有返回值之前就给它设置好一个callback，回调函数；而基于Poll的模型，只是返回一个包含数据的枚举，表示自己准备好了（Ready<T>），还是没有准备好（Pending）。</p>
+<p>基于Poll的<code>Future</code>模型，给了用户更多的灵活性，但同时意味着，用户必须要做更多的事情。比如，你如果想要得到结果就立即执行相关的代码，你就必须时刻在轮询<code>poll</code>这个函数，当它返回Ready时，对相关的数据（T）执行相关的代码。多数时候你不能在主要的线程中执行轮询，所以我们可能需要一个可以管理绿色线程的运行时，比如说<code>Tokio</code>，所以这个时候，我们又使用到了绿色线程，但这个时候管理绿色线程的运行时，不是语言本身提供的，而是第三方库提供的。当你用不上异步代码时，你也就不会加载这个多余的运行时。</p>
+<p>同样的这个<code>Future</code>模型也可以实现为<code>async</code>和<code>await</code>语法，这是非常棒的，我们期待稳定后的Rust1.39。</p>
+<p>这个模型属于零成本抽象的范畴。原因是：它符合了零成本抽象的两条定义。</p>
+<h2 id="can-kao-lian-jie">参考连接</h2>
+<p><a href="https://boats.gitlab.io/blog/">Without Boats Blog</a>
+<a href="https://rustlang-cn.org/office/rust/book/concurrency/ch16-01-threads.html">The Book 使用线程同时运行代码</a></p>
+
+    </div>
+
+    
+    <div class="article-info">
+        
+        <div class="article-date"> 9 September 2019</div>
+        
+        <div class="article-taxonomies">
+            
+                <ul class="article-categories">
+                    
+                    <li><a href="https://blog.kingrong.kr/categories/rust/">Rust</a></li>
+                    
+                </ul>
+            
+            
+                <ul class="article-tags">
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/rust/">#rust</a></li>
+                    
+                    <li><a href="https://blog.kingrong.kr/tags/aync/">#aync</a></li>
+                    
+                </ul>
+            
+        </div>
+    </div>
+
+
+</article>
+
+
+        </main>
+
+        <div>
+    <hr>
+    <section>
+        <h2>Comments</h2>
+        
+    <script src="https://utteranc.es/client.js"
+        repo="kingrongH/blog.comments"
+        issue-term="org:title"
+        theme="boxy-light"
+        crossorigin="anonymous"
+        async>
+    </script>
+
+    </section>
+</div>
+
+        <footer>
+            <p>
+                © kingrong&#x27;s blog 2021
+                | Powered by <a target="_blank" href="https://getzola.com/">Zola</a>, Theme <a target="_blank" href="https://github.com/zbrox/anpu-zola-theme">Anpu</a>.
+            </p>
+            <p>
+                
+                
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
